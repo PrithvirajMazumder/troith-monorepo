@@ -1,0 +1,9 @@
+{
+  "name": "troithWeb-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/troithWeb-e2e/src",
+  "tags": [],
+  "implicitDependencies": ["troithWeb"],
+  "// targets": "to see all targets run: nx show project troithWeb-e2e --web",
+  "targets": {}
+}
