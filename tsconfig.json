@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@troith/shared": ["shared/src/index.ts"],
+      "@troith/shared/*": ["shared/src/*"],
+      "@troith/shared/server": ["shared/src/server.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
