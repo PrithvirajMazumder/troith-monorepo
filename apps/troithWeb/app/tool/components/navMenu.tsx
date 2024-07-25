@@ -40,6 +40,7 @@ export const NavMenu = ({ children, variant = 'ghost', className, iconOnly = fal
       {...props}
       className={cn(
         buttonVariants({ variant, size: 'sm' }),
+        'w-full',
         'justify-start',
         className,
         variant === 'default' && 'dark:bg-muted dark:text-white dark:hover:bg-muted'

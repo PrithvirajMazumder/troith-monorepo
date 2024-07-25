@@ -17,7 +17,9 @@
     "paths": {
       "@troith/shared": ["shared/src/index.ts"],
       "@troith/shared/*": ["shared/src/*"],
-      "@troith/shared/server": ["shared/src/server.ts"]
+      "@troith/shared/server": ["shared/src/server.ts"],
+      "@troithWeb/*": ["apps/troithWeb/*"]
+
     }
   },
   "exclude": ["node_modules", "tmp"]
