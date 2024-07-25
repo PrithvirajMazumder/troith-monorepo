@@ -26,14 +26,19 @@ import {
   Settings,
   SlidersHorizontal,
   SquarePercent,
+  Sun,
   Trash,
   UsersRound
 } from 'lucide-react'
 import { NavMenu } from './components/navMenu'
 import { useState } from 'react'
+import { useTheme } from 'next-themes'
 
 const ToolLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { setTheme, theme } = useTheme()
+
+  console.log('theme: ', theme)
 
   return (
     <TooltipProvider>
@@ -93,8 +98,29 @@ const ToolLayout = () => {
               <NavMenu iconOnly={isCollapsed} className="mt-auto" href="#" icon={Settings}>
                 Settings
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={Moon}>
+              <NavMenu
+                className="flex dark:hidden transition-all duration-300"
+                onClick={(event) => {
+                  event.preventDefault()
+                  setTheme('dark')
+                }}
+                iconOnly={isCollapsed}
+                href="#"
+                icon={Moon}
+              >
                 Dark mode
+              </NavMenu>
+              <NavMenu
+                className="hidden dark:flex transition-all duration-300"
+                onClick={(event) => {
+                  event.preventDefault()
+                  setTheme('light')
+                }}
+                iconOnly={isCollapsed}
+                href="#"
+                icon={Sun}
+              >
+                Light mode
               </NavMenu>
               <NavMenu iconOnly={isCollapsed} href="#" icon={LogOut}>
                 Logout
