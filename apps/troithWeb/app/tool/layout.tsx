@@ -16,6 +16,7 @@ import { H3, P } from '@troith/shared/components/typography'
 import {
   Download,
   Factory,
+  Home,
   Landmark,
   LogOut,
   Moon,
@@ -33,12 +34,12 @@ import {
 import { NavMenu } from './components/navMenu'
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
 
 const ToolLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const { setTheme, theme } = useTheme()
-
-  console.log('theme: ', theme)
+  const { setTheme } = useTheme()
+  const pathname = usePathname()
 
   return (
     <TooltipProvider>
@@ -73,29 +74,38 @@ const ToolLayout = () => {
               </header>
             )}
             <div style={{ alignItems: isCollapsed ? 'center' : 'start' }} className="py-2 flex-col flex gap-1 h-full">
-              <NavMenu iconOnly={isCollapsed} href="#" icon={ScrollText}>
+              <NavMenu variant={pathname === '/tool' ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool" icon={Home}>
+                Dashboard
+              </NavMenu>
+              <NavMenu variant={pathname.includes('invoices') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/invoices" icon={ScrollText}>
                 Invoices
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={NotebookText}>
+              <NavMenu variant={pathname.includes('challans') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/challans" icon={NotebookText}>
                 Challans
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={Pyramid}>
+              <NavMenu variant={pathname.includes('items') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/items" icon={Pyramid}>
                 Items
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={UsersRound}>
+              <NavMenu variant={pathname.includes('parties') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/parties" icon={UsersRound}>
                 Parties
               </NavMenu>
               <Separator className="my-2" />
-              <NavMenu iconOnly={isCollapsed} href="#" icon={Factory}>
+              <NavMenu variant={pathname.includes('companies') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/companies" icon={Factory}>
                 Companies
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={SquarePercent}>
+              <NavMenu variant={pathname.includes('taxes') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/taxes" icon={SquarePercent}>
                 Taxes
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={Landmark}>
+              <NavMenu variant={pathname.includes('banks') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/banks" icon={Landmark}>
                 Banks
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} className="mt-auto" href="#" icon={Settings}>
+              <NavMenu
+                variant={pathname.includes('settings') ? 'default' : 'ghost'}
+                iconOnly={isCollapsed}
+                className="mt-auto"
+                href="/tool/settings"
+                icon={Settings}
+              >
                 Settings
               </NavMenu>
               <NavMenu

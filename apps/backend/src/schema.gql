@@ -1,0 +1,319 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: String!
+  email: String
+  name: String
+  phone: Int
+}
+
+type Bank {
+  id: String!
+  accountNumber: Int!
+  branch: String!
+  name: String!
+  ifsc: String!
+  user: User
+}
+
+type Company {
+  id: String!
+  name: String!
+  legalName: String!
+  city: String!
+  state: String!
+  addressLine1: String!
+  addressLine2: String
+  zipCode: Float!
+  gstin: String!
+  totalGrossInvoiceAmount: Int
+  totalNetChallanAmount: Int
+  totalGrossChallanAmount: Int
+  totalNetInvoiceAmount: Int
+  user: User!
+  bank: Bank!
+}
+
+type Tax {
+  id: String
+  cgst: Int!
+  sgst: Int!
+}
+
+type Uom {
+  id: String
+  abbreviation: String!
+  name: String!
+  company: Company
+}
+
+type Item {
+  id: String!
+  name: String!
+  hsn: Int
+  company: Company
+  tax: Tax!
+  uom: Uom!
+}
+
+type Party {
+  id: String
+  addressLine1: String
+  addressLine2: String
+  zipCode: Int
+  name: String
+  state: String
+  gstin: String
+  city: String
+  partyItemIds: [String!]
+  company: Company
+}
+
+type InvoiceItem {
+  quantity: Int!
+  item: Item
+  price: Int!
+}
+
+type Invoice {
+  id: String!
+  date: String!
+  invoiceItems: [InvoiceItem!]!
+  party: Party!
+  vehicleNumber: String
+  company: Company
+  tax: Tax
+  no: String!
+  bank: Bank
+  status: InvoiceStatus!
+}
+
+enum InvoiceStatus {
+  Draft
+  Confirmed
+  Paid
+}
+
+type Challan {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Query {
+  companies(userId: String!): [Company!]!
+  company(id: String!): Company!
+  banks: [Bank!]!
+  bank(id: String!): Bank!
+  users: [User!]!
+  user(id: String!): User!
+  taxes: [Tax!]!
+  tax(id: String!): Tax!
+  uoms: [Uom!]!
+  uom(id: String!): Uom!
+  companyUoms(companyId: String!): [Uom!]!
+  items(companyId: String!): [Item!]!
+  item(id: String!): Item!
+  parties(companyId: String!): [Party!]!
+  party(id: String!): Party!
+  invoices(companyId: String!): [Invoice!]!
+  invoice(id: String!): Invoice!
+  challans: [Challan!]!
+  challan(id: Int!): Challan!
+}
+
+type Mutation {
+  createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
+  removeCompany(id: String!): Company!
+  createBank(createBankInput: CreateBankInput!): Bank!
+  updateBank(updateBankInput: UpdateBankInput!): Bank!
+  removeBank(id: Int!): Bank!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: String!): User!
+  createTax(createTaxInput: CreateTaxInput!): Tax!
+  updateTax(updateTaxInput: UpdateTaxInput!): Tax!
+  removeTax(id: String!): Tax!
+  createUom(createUomInput: CreateUomInput!): Uom!
+  updateUom(updateUomInput: UpdateUomInput!): Uom!
+  removeUom(id: String!): Uom!
+  createItem(createItemInput: CreateItemInput!): Item!
+  updateItem(updateItemInput: UpdateItemInput!): Item!
+  removeItem(id: String!): Item!
+  createParty(createPartyInput: CreatePartyInput!): Party!
+  updateParty(updatePartyInput: UpdatePartyInput!): Party!
+  removeParty(id: String!): Party!
+  createInvoice(createInvoiceInput: CreateInvoiceInput!): Invoice!
+  updateInvoice(updateInvoiceInput: UpdateInvoiceInput!): Invoice!
+  removeInvoice(id: String!): Invoice!
+  createChallan(createChallanInput: CreateChallanInput!): Challan!
+  updateChallan(updateChallanInput: UpdateChallanInput!): Challan!
+  removeChallan(id: Int!): Challan!
+}
+
+input CreateCompanyInput {
+  name: String!
+  legalName: String!
+  city: String!
+  state: String!
+  addressLine1: String!
+  addressLine2: String
+  zipCode: Float!
+  gstin: String!
+  userId: String!
+  bankId: String!
+}
+
+input UpdateCompanyInput {
+  name: String
+  legalName: String
+  city: String
+  state: String
+  addressLine1: String
+  addressLine2: String
+  zipCode: Float
+  gstin: String
+  userId: String
+  bankId: String
+  id: String!
+  totalGrossInvoiceAmount: Int
+  totalNetChallanAmount: Int
+  totalGrossChallanAmount: Int
+  totalNetInvoiceAmount: Int
+}
+
+input CreateBankInput {
+  accountNumber: Int!
+  branch: String!
+  name: String!
+  ifsc: String!
+  userId: String!
+}
+
+input UpdateBankInput {
+  accountNumber: Int
+  branch: String
+  name: String
+  ifsc: String
+  userId: String
+  id: String!
+}
+
+input CreateUserInput {
+  email: String
+  name: String
+  phone: Int
+}
+
+input UpdateUserInput {
+  email: String
+  name: String
+  phone: Int
+  id: String
+}
+
+input CreateTaxInput {
+  cgst: Int!
+  sgst: Int!
+}
+
+input UpdateTaxInput {
+  cgst: Int
+  sgst: Int
+  id: String!
+}
+
+input CreateUomInput {
+  abbreviation: String!
+  name: String!
+  companyId: String!
+}
+
+input UpdateUomInput {
+  abbreviation: String
+  name: String
+  companyId: String
+  id: String!
+}
+
+input CreateItemInput {
+  name: String!
+  hsn: Float
+  companyId: String!
+  taxId: String!
+  uomId: String!
+}
+
+input UpdateItemInput {
+  name: String
+  hsn: Float
+  taxId: String
+  uomId: String
+  id: String!
+}
+
+input CreatePartyInput {
+  addressLine1: String!
+  addressLine2: String
+  zipCode: Int!
+  name: String!
+  state: String!
+  gstin: String!
+  city: String!
+  partyItemIds: [String!]!
+  companyId: String!
+}
+
+input UpdatePartyInput {
+  addressLine1: String
+  addressLine2: String
+  zipCode: Int
+  name: String
+  state: String
+  gstin: String
+  city: String
+  partyItemIds: [String!]
+  id: String!
+}
+
+input CreateInvoiceInput {
+  invoiceItems: [CreateInvoiceItemInput!]!
+  partyId: String!
+  vehicleNumber: String!
+  date: String!
+  companyId: String!
+  taxId: String!
+  no: String!
+  bankId: String!
+}
+
+input CreateInvoiceItemInput {
+  quantity: Int!
+  itemId: String!
+  price: Int!
+}
+
+input UpdateInvoiceInput {
+  invoiceItems: [CreateInvoiceItemInput!]
+  partyId: String
+  vehicleNumber: String
+  date: String
+  taxId: String
+  no: String
+  bankId: String
+  id: String!
+  status: InvoiceStatus
+}
+
+input CreateChallanInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateChallanInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
