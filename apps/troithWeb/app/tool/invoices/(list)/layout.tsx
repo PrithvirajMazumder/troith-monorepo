@@ -1,6 +1,6 @@
 'use client'
-import { Button, H3, Input, P, ScrollArea, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
-import { Download, Pencil, SlidersHorizontal, Trash } from 'lucide-react'
+import { Button, H3, Input, P, ScrollArea, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
+import { SlidersHorizontal } from 'lucide-react'
 import { ReactNode } from 'react'
 import { ResizableTwoColumnToolLayout } from '@troithWeb/app/tool/components/layouts/resizableTwoColumnToolLayout'
 

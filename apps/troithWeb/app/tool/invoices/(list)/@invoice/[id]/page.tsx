@@ -1,10 +1,17 @@
 'use client'
 import { Button, buttonVariants, P, ScrollArea, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
-import { Download, Pencil, Trash, X } from 'lucide-react'
+import { Download, Eye, Pencil, Trash, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
+import { useSuspenseQuery } from '@apollo/client'
+import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
+import { generateInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateInvoice'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
+  const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.detailsById, {
+    variables: { invoiceId }
+  })
+
   return (
     <>
       <header className="border-b px-4 py-4 h-16 flex items-center">
@@ -31,12 +38,22 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
         <Separator orientation="vertical" className="mx-2" />
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => invoiceData && generateInvoicePdf(invoiceData)}>
               <Download className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
             <P>Download</P>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Eye className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <P>View</P>
           </TooltipContent>
         </Tooltip>
 
