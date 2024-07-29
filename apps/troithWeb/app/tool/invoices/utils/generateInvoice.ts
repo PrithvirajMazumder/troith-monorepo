@@ -1,9 +1,11 @@
-import { GetInvoiceQuery } from '@troithWeb/__generated__/graphql'
+import { GetInvoiceQuery, InvoiceItem } from '@troithWeb/__generated__/graphql'
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
 import { robotoBase64 } from '@troithWeb/public/fonts/robotto'
 import { capitalize } from '@troithWeb/utils/string'
 import { format } from 'date-fns'
+import { convertAmountToInr } from '@troithWeb/utils/currency'
+import { getDecimalPart } from '@troithWeb/utils/number'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 window.pdfMake.vfs['TiroTamil-Regular.ttf'] = robotoBase64
@@ -17,18 +19,26 @@ const FontSizes = {
   SmallFontSize: 8
 }
 
+function getTotalValue(invoiceItems: InvoiceItem[]) {
+  return invoiceItems?.reduce((acc, curr) => acc + curr.price * curr.quantity, 0)
+}
+
 export const generateInvoicePdf = (invoiceData: GetInvoiceQuery) => {
   const { invoice } = invoiceData
+  const grossTotal = getTotalValue(invoice?.invoiceItems)
+  const sgst = (getTotalValue(invoice?.invoiceItems ?? []) * (invoice?.tax?.sgst ?? 0)) / 100
+  const cgst = (getTotalValue(invoice?.invoiceItems ?? []) * (invoice?.tax?.cgst ?? 0)) / 100
+  const igst = (getTotalValue(invoice?.invoiceItems ?? []) * ((invoice?.tax?.cgst ?? 0) + (invoice?.tax?.sgst ?? 0))) / 100
+  const roundOff = parseInt(`0.${getDecimalPart(grossTotal + cgst + sgst)}`).toFixed(2)
+  const netTotal = Math.floor(grossTotal + cgst + sgst)
+
   const items = invoiceData?.invoice?.invoiceItems?.map((invoiceItem, index) => [
     index + 1,
     invoiceItem?.item?.name ?? '',
     invoiceItem?.item?.hsn ?? '',
     `${invoiceItem?.quantity} ${invoiceItem?.item?.uom?.abbreviation}`,
     {
-      text: `${invoiceItem?.price.toLocaleString('en-IN', {
-        style: 'currency',
-        currency: 'INR'
-      })}`.replace('₹', ''),
+      text: `${convertAmountToInr(invoiceItem?.price, false)}`,
       alignment: 'right'
     }
   ])
@@ -149,9 +159,58 @@ export const generateInvoicePdf = (invoiceData: GetInvoiceQuery) => {
         },
         [
           {
+            marginTop: 10,
             table: {
-              widths: [''],
-              body: []
+              widths: ['*', '30%', '15%', '20%'],
+              body: [
+                [
+                  { stack: ['E. & O. E.', `For ${capitalize(invoice?.company?.legalName ?? '')}`], rowSpan: 7 },
+                  { text: 'Bank Details', rowSpan: 7 },
+                  'Gross Total',
+                  {
+                    text: convertAmountToInr(grossTotal, false),
+                    style: { alignment: 'right' }
+                  }
+                ],
+                [
+                  '',
+                  '',
+                  'SGST%',
+                  {
+                    text: { text: convertAmountToInr(sgst, false) },
+                    style: { alignment: 'right' }
+                  }
+                ],
+                [
+                  '',
+                  '',
+                  'CGST%',
+                  {
+                    text: convertAmountToInr(cgst, false),
+                    style: { alignment: 'right' }
+                  }
+                ],
+                ['', '', 'IGST%', { text: convertAmountToInr(igst, false), style: { alignment: 'right' } }],
+                [
+                  '',
+                  '',
+                  'ROUND OFF',
+                  {
+                    text: roundOff,
+                    style: { alignment: 'right' }
+                  }
+                ],
+                [
+                  '',
+                  '',
+                  'NET TOTAL',
+                  {
+                    text: convertAmountToInr(netTotal, false),
+                    style: { alignment: 'right' }
+                  }
+                ],
+                ['', '', { text: 'ruppes', colSpan: 2 }, '']
+              ]
             }
           }
         ]
