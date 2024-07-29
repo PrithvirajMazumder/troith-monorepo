@@ -1,6 +1,6 @@
 'use client'
 import { Button, H3, Input, P, ScrollArea, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
-import { SlidersHorizontal } from 'lucide-react'
+import { Plus, SlidersHorizontal } from 'lucide-react'
 import { ReactNode } from 'react'
 import { ResizableTwoColumnToolLayout } from '@troithWeb/app/tool/components/layouts/resizableTwoColumnToolLayout'
 
@@ -28,7 +28,7 @@ export default function InvoicesLayout(props: Props) {
               </TooltipContent>
             </Tooltip>
           </header>
-          <ScrollArea className="px-4 pt-4 pb-20 h-full w-full">{props.children}</ScrollArea>
+          <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{props.children}</ScrollArea>
         </>
       }
       secondCol={props.invoice}
