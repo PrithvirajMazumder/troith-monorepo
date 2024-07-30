@@ -28,7 +28,7 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
       <header className="border-b px-4 pb-4">
         <div className="flex items-center gap-2 h-16">
           <H3>Create Invoice</H3>
-          <Link className={cn('ml-auto', buttonVariants({ variant: 'ghost', size: 'icon' }))} href="./">
+          <Link className={cn('ml-auto', buttonVariants({ variant: 'ghost', size: 'icon' }))} href="/tool/invoices">
             <X className="w-4 h-4" />
           </Link>
         </div>

@@ -16,7 +16,7 @@ export default function Invoices() {
     <>
       <Link
         href="/tool/invoices/create"
-        className={cn('shadow-md shadow-primary absolute bottom-20 right-4', buttonVariants({ variant: 'default' }))}
+        className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-20 right-4', buttonVariants({ variant: 'default' }))}
       >
         <Plus className="h-4 w-4 mr-2" />
         Create invoice

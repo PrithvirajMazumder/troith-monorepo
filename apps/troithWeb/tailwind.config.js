@@ -89,7 +89,6 @@ module.exports = {
           '100%': { transform: 'translateX(100%) scaleX(0.5)' }
         }
       },
-
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
