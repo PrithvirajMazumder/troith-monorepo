@@ -3,11 +3,10 @@ import { useSuspenseQuery } from '@apollo/client'
 import { ItemQueries } from '@troithWeb/app/tool/items/queries/itemQueries'
 import { ItemCard } from '@troithWeb/app/tool/components/itemCard'
 import { Item } from '@troithWeb/__generated__/graphql'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, buttonVariants, H3 } from '@troith/shared'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, H3 } from '@troith/shared'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { cn } from '@troith/shared/lib/util'
-import { ChevronRight, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function SelectItemsCreateInvoicePage() {
@@ -66,7 +65,7 @@ export default function SelectItemsCreateInvoicePage() {
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
         onClick={() => {
-          router.push('/tool/invoices/create/tax')
+          router.push('/tool/invoices/create/configure-invoice-items')
         }}
       >
         Continue

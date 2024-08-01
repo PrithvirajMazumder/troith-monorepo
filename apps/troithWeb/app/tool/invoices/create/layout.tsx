@@ -45,11 +45,21 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              {pathname === '/tool/invoices/create/select-items' ? (
-                <BreadcrumbPage>Select Items</BreadcrumbPage>
+              {pathname === '/tool/invoices/create/choose-items' ? (
+                <BreadcrumbPage>Choose Items</BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
-                  <Link href="/tool/invoices/create/select-items">Select Items</Link>
+                  <Link href="/tool/invoices/create/choose-items">Choose Items</Link>
+                </BreadcrumbLink>
+              )}{' '}
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {pathname === '/tool/invoices/create/configure-invoice-items' ? (
+                <BreadcrumbPage>Configure Invoice Items</BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink asChild>
+                  <Link href="/tool/invoices/create/configure-invoice-items">Configure Invoice Items</Link>
                 </BreadcrumbLink>
               )}{' '}
             </BreadcrumbItem>

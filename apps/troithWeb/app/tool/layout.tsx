@@ -71,7 +71,11 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
                   Challans
                 </NavMenu>
                 <NavMenu
-                  variant={pathname.includes('items') && !pathname.includes('select-items') ? 'default' : 'ghost'}
+                  variant={
+                    pathname.includes('items') && !pathname.includes('choose-items') && !pathname.includes('configure-invoice-items')
+                      ? 'default'
+                      : 'ghost'
+                  }
                   iconOnly={isCollapsed}
                   href="/tool/items"
                   icon={Pyramid}

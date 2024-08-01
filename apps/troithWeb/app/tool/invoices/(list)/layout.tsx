@@ -1,8 +1,19 @@
 'use client'
-import { Button, H3, Input, P, ScrollArea, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
-import { Plus, SlidersHorizontal } from 'lucide-react'
-import { ReactNode } from 'react'
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Input,
+  ScrollArea
+} from '@troith/shared'
+import { CheckCircle, Gem, PencilLine, PlusCircle } from 'lucide-react'
+import { ReactNode, useState } from 'react'
 import { ResizableTwoColumnToolLayout } from '@troithWeb/app/tool/components/layouts/resizableTwoColumnToolLayout'
+import { InvoiceStatuses } from '@troithWeb/app/constants/invoiceStatuses'
 
 type Props = {
   children: ReactNode
@@ -15,18 +26,28 @@ export default function InvoicesLayout(props: Props) {
       firstCol={
         <>
           <header className="border-b px-4 h-16 flex items-center gap-2">
-            <H3>Invoices</H3>
-            <Input className="ml-auto max-w-36 w-full" placeholder="Search" />
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <SlidersHorizontal className="h-4 w-4" />
+            <Input className="h-8 w-6xl shadow-sm" placeholder="Filter Invoices" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="shadow-sm border-dashed h-8 border">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Status
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <P>Filters</P>
-              </TooltipContent>
-            </Tooltip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="capitalize">
+                  <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatuses.Draft}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="capitalize">
+                  <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatuses.Confirmed}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="capitalize">
+                  <Gem className="w-4 h-4 mr-2" /> {InvoiceStatuses.Paid}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </header>
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{props.children}</ScrollArea>
         </>

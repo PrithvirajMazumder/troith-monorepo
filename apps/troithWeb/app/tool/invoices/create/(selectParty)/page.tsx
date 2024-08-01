@@ -16,7 +16,7 @@ export default function SelectPartyCreateInvoicePage() {
 
   const handlePartySelection = (party: Party) => {
     setSelectedParty(party)
-    void router.replace('/tool/invoices/create/select-items')
+    void router.replace('/tool/invoices/create/choose-items')
   }
 
   return (
