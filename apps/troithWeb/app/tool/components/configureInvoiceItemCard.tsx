@@ -1,7 +1,7 @@
 import { cn } from '@troith/shared/lib/util'
 import { Button, H4, Input, Separator } from '@troith/shared'
 import { InvoiceItem } from '@troithWeb/__generated__/graphql'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { EqualIcon, X } from 'lucide-react'
 
@@ -13,6 +13,12 @@ type Props = {
 export const ConfigureInvoiceItemCard = ({ invoiceItem, ...props }: Props) => {
   const [quantity, setQuantity] = useState<number | null>(null)
   const [price, setPrice] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (price && quantity && (price ?? 0) * (quantity ?? 0) > 0) {
+      props.onItemUpdate({ ...invoiceItem, price, quantity })
+    }
+  }, [price, quantity])
 
   return (
     <div className={cn('flex items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all w-full')}>
@@ -50,7 +56,13 @@ export const ConfigureInvoiceItemCard = ({ invoiceItem, ...props }: Props) => {
             </div>
             <EqualIcon className="h-4 w-4" />
             <Button className="h-8 border-dashed border shadow-sm" tabIndex={-1} variant="ghost">
-              Total: {convertAmountToInr((quantity ?? 0) * (price ?? 0)).replace('.00', '')}
+              Total:{' '}
+              {convertAmountToInr(
+                (() => {
+                  const total = (quantity ?? 0) * (price ?? 0)
+                  return isNaN(total) ? 0 : total
+                })()
+              ).replace('.00', '')}
             </Button>
           </div>
         </div>

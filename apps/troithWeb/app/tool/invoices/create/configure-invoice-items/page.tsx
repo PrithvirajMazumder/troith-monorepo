@@ -6,26 +6,41 @@ import { ChevronRight } from 'lucide-react'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useRouter } from 'next/navigation'
 import { ConfigureInvoiceItemCard } from '@troithWeb/app/tool/components/configureInvoiceItemCard'
+import { useState } from 'react'
 
 export default function ConfigureInvoiceItems() {
   const { selectedItems } = useCreateInvoice()
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
+    selectedItems.map((selectedItem) => ({
+      item: selectedItem,
+      price: 0,
+      quantity: 0
+    }))
+  )
   const router = useRouter()
 
   return (
     <>
       <H3 className="mb-4">Configure Invoice Items</H3>
       <div className="flex flex-col gap-3 mt-4">
-        {selectedItems?.map((item) => {
-          const invoiceItem: InvoiceItem = {
-            item,
-            price: 0,
-            quantity: 0
-          }
-          return <ConfigureInvoiceItemCard onItemUpdate={() => {}} {...{ invoiceItem }} key={item?.id} />
+        {invoiceItems?.map((invoiceItem, index) => {
+          return (
+            <ConfigureInvoiceItemCard
+              onItemUpdate={(invoiceItem) => {
+                setInvoiceItems((invoiceItems) => {
+                  invoiceItems[index] = invoiceItem
+
+                  return [...invoiceItems]
+                })
+              }}
+              {...{ invoiceItem }}
+              key={invoiceItem?.item?.id}
+            />
+          )
         })}
       </div>
       <Button
-        disabled={!selectedItems?.length}
+        disabled={invoiceItems.some((invoiceItem) => invoiceItem.quantity * invoiceItem.price <= 0)}
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
         onClick={() => {

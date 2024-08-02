@@ -9,6 +9,8 @@ type CreateInvoiceContextProps = {
   setSelectedTax: Dispatch<SetStateAction<Tax | null>>
   selectedItems: Item[]
   setSelectedItems: Dispatch<SetStateAction<Item[]>>
+  invoiceItems: InvoiceItem[]
+  setInvoiceItems: Dispatch<SetStateAction<InvoiceItem[]>>
 }
 
 const CreateInvoiceContext = createContext<CreateInvoiceContextProps>({} as CreateInvoiceContextProps)
@@ -17,6 +19,7 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   const [selectedParty, setSelectedParty] = useState<Party | null>(null)
   const [selectedItems, setSelectedItems] = useState<Item[]>([])
   const [selectedTax, setSelectedTax] = useState<Tax | null>(null)
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -28,6 +31,8 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   return (
     <CreateInvoiceContext.Provider
       value={{
+        setInvoiceItems,
+        invoiceItems,
         selectedItems,
         selectedParty,
         setSelectedParty,
