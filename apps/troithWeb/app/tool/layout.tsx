@@ -21,7 +21,6 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { setTheme } = useTheme()
   const pathname = usePathname()
-
   return (
     <ApolloWrapper>
       <TooltipProvider>

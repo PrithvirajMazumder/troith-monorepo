@@ -8,6 +8,7 @@ import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/cre
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'
@@ -28,7 +29,7 @@ export default function SelectItemsCreateInvoicePage() {
 
   return (
     <>
-      <H3 className="mb-4">Select Items</H3>
+      <CreateInvoicePagesHeader className="!mb-2" title="Select Items" subtitle="Select the items you would like to add to this invoice." />
       {selectedParty?.partyItemIds?.length ? (
         <Accordion defaultValue={AccordionId} type="single" collapsible className="w-full">
           <AccordionItem defaultChecked value={AccordionId}>

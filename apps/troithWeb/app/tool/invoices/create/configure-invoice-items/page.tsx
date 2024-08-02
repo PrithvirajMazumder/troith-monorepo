@@ -7,9 +7,10 @@ import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/cre
 import { useRouter } from 'next/navigation'
 import { ConfigureInvoiceItemCard } from '@troithWeb/app/tool/components/configureInvoiceItemCard'
 import { useState } from 'react'
+import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 
 export default function ConfigureInvoiceItems() {
-  const { selectedItems } = useCreateInvoice()
+  const { selectedItems, setInvoiceItems: setSelectedInvoiceItems } = useCreateInvoice()
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
     selectedItems.map((selectedItem) => ({
       item: selectedItem,
@@ -21,8 +22,8 @@ export default function ConfigureInvoiceItems() {
 
   return (
     <>
-      <H3 className="mb-4">Configure Invoice Items</H3>
-      <div className="flex flex-col gap-3 mt-4">
+      <CreateInvoicePagesHeader title="Configure Invoice Items" subtitle="Please add the quantity and price to the items that have been selected." />
+      <div className="flex flex-col gap-3">
         {invoiceItems?.map((invoiceItem, index) => {
           return (
             <ConfigureInvoiceItemCard
@@ -44,7 +45,8 @@ export default function ConfigureInvoiceItems() {
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
         onClick={() => {
-          router.push('/tool/invoices/create/configure-invoice-items')
+          setSelectedInvoiceItems([...invoiceItems])
+          router.push('/tool/invoices/create/misc')
         }}
       >
         Continue

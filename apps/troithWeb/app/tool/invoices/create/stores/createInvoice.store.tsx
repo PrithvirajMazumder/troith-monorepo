@@ -1,5 +1,5 @@
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
-import { InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
+import { Bank, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next/navigation'
 
 type CreateInvoiceContextProps = {
@@ -11,6 +11,8 @@ type CreateInvoiceContextProps = {
   setSelectedItems: Dispatch<SetStateAction<Item[]>>
   invoiceItems: InvoiceItem[]
   setInvoiceItems: Dispatch<SetStateAction<InvoiceItem[]>>
+  selectedBank: Bank | null
+  setSelectedBank: Dispatch<SetStateAction<Bank | null>>
 }
 
 const CreateInvoiceContext = createContext<CreateInvoiceContextProps>({} as CreateInvoiceContextProps)
@@ -20,6 +22,7 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   const [selectedItems, setSelectedItems] = useState<Item[]>([])
   const [selectedTax, setSelectedTax] = useState<Tax | null>(null)
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -33,6 +36,8 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
       value={{
         setInvoiceItems,
         invoiceItems,
+        selectedBank,
+        setSelectedBank,
         selectedItems,
         selectedParty,
         setSelectedParty,

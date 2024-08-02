@@ -75,6 +75,26 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
+              {pathname === '/tool/invoices/create/bank' ? (
+                <BreadcrumbPage>Bank</BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink asChild>
+                  <Link href="/tool/invoices/create/bank">Bank</Link>
+                </BreadcrumbLink>
+              )}{' '}
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {pathname === '/tool/invoices/create/misc' ? (
+                <BreadcrumbPage>Misc</BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink asChild>
+                  <Link href="/tool/invoices/create/misc">Misc</Link>
+                </BreadcrumbLink>
+              )}{' '}
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
               {pathname === '/tool/invoices/create/preview' ? (
                 <BreadcrumbPage>Preview</BreadcrumbPage>
               ) : (

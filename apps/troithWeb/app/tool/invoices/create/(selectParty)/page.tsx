@@ -1,11 +1,12 @@
 'use client'
 import { useSuspenseQuery } from '@apollo/client'
 import { PartyQueries } from '@troithWeb/app/tool/parties/queries/partyQueries'
-import { H4 } from '@troith/shared'
+import { H4, Separator } from '@troith/shared'
 import { PartyCard } from '@troithWeb/app/tool/components/partyCard'
 import { Party } from '@troithWeb/__generated__/graphql'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useRouter } from 'next/navigation'
+import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 
 export default function SelectPartyCreateInvoicePage() {
   const router = useRouter()
@@ -21,7 +22,10 @@ export default function SelectPartyCreateInvoicePage() {
 
   return (
     <>
-      <H4 className="mb-4">Select Party</H4>
+      <CreateInvoicePagesHeader
+        title="Select Party"
+        subtitle="Please select a party for whom you would like to create this invoice from the available options."
+      />
       {partiesData?.parties?.map((party) => (
         <PartyCard
           isSelected={party.id === selectedParty?.id}

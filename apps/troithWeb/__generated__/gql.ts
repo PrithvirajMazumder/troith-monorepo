@@ -13,6 +13,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "query GetBanks {\n    banks {\n      id\n      accountNumber\n      branch\n      name\n      ifsc\n      user {\n        id\n      }\n    }\n  }": types.GetBanksDocument,
+    "query GetTaxes {\n    taxes {\n      id\n      sgst\n      cgst\n    }\n  }": types.GetTaxesDocument,
     "query\n  GetInvoices ($companyId: String!) {\n      invoices(companyId: $companyId){\n          id\n          date\n          status\n          party{\n              name\n          }\n          invoiceItems{\n              quantity\n              price\n          }\n          no\n          vehicleNumber\n      }\n  }": types.GetInvoicesDocument,
     "\n      query GetInvoice($invoiceId: String!) {\n          invoice(id: $invoiceId) {\n              id\n              date\n              invoiceItems {\n                  quantity\n                  item {\n                      id\n                      name\n                      hsn\n                      tax{\n                          cgst\n                          sgst\n                      }\n                      uom{\n                          abbreviation\n                          name\n                      }\n                  }\n                  price\n              }\n              party{\n                  id\n                  addressLine1\n                  addressLine2\n                  zipCode\n                  name\n                  state\n                  gstin\n                  city\n                  partyItemIds\n              }\n              vehicleNumber\n              company{\n                  legalName\n                  city\n                  state\n                  addressLine1\n                  addressLine2\n                  zipCode\n                  gstin\n              }\n              tax{\n                  cgst\n                  sgst\n              }\n              no\n              bank{\n                  id\n                  accountNumber\n                  branch\n                  name\n                  ifsc\n              }\n              status\n          }\n      }": types.GetInvoiceDocument,
     "query GetItems($companyId: String!) {\n  items(companyId: $companyId) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}": types.GetItemsDocument,
@@ -34,6 +36,14 @@ const documents = {
  */
 export function gql(source: string): unknown;
 
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "query GetBanks {\n    banks {\n      id\n      accountNumber\n      branch\n      name\n      ifsc\n      user {\n        id\n      }\n    }\n  }"): (typeof documents)["query GetBanks {\n    banks {\n      id\n      accountNumber\n      branch\n      name\n      ifsc\n      user {\n        id\n      }\n    }\n  }"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "query GetTaxes {\n    taxes {\n      id\n      sgst\n      cgst\n    }\n  }"): (typeof documents)["query GetTaxes {\n    taxes {\n      id\n      sgst\n      cgst\n    }\n  }"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
