@@ -46,7 +46,7 @@ export default function ConfigureInvoiceItems() {
         variant="default"
         onClick={() => {
           setSelectedInvoiceItems([...invoiceItems])
-          router.push('/tool/invoices/create/misc')
+          router.push('/tool/invoices/create/finalize-invoice')
         }}
       >
         Continue
