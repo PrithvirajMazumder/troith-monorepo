@@ -75,5 +75,11 @@ export const InvoiceQueries = {
               }
               status
           }
-      }`)
+      }`),
+  suggestedNextInvoiceNumber: gql(`query GetNextInvoiceNumber { suggestedNextInvoiceNumber }`),
+  getInvoiceNumberWithNo: gql(`query GetInvoiceNumberWithNo ($no: String!) {
+    invoiceByNo(no: $no){
+      no
+    }
+  }`)
 } as const

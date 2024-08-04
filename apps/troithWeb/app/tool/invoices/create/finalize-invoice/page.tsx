@@ -10,31 +10,40 @@ import {
   DialogTrigger,
   Input,
   Label,
-  Separator
+  Separator,
+  useDebounce
 } from '@troith/shared'
 import { useForm } from 'react-hook-form'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 import { FormField } from '@troith/shared/components/ui/form-field'
-import { useSuspenseQuery } from '@apollo/client'
+import { useLazyQuery, useSuspenseQuery } from '@apollo/client'
 import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
 import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BankQueries } from '@troithWeb/app/queries/bankQueries'
 import { BankCard } from '@troithWeb/app/tool/components/bankCard'
 import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from '@troithWeb/app/tool/invoices/create/finalize-invoice/schemas'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Loader } from 'lucide-react'
+import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
+  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
+  const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isinvoiceNumberPresentLoading }] = useLazyQuery(
+    InvoiceQueries.getInvoiceNumberWithNo,
+    {}
+  )
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
   const {
+    setError,
     handleSubmit,
+    clearErrors,
     register,
     formState: { errors },
     watch,
@@ -43,17 +52,40 @@ export default function AddMisc() {
   } = useForm<FinaliseInvoiceFormFields>({
     resolver: yupResolver(FinaliseInvoiceFormValidationSchema),
     defaultValues: {
-      shouldUseIgst: false
+      shouldUseIgst: false,
+      invoiceNumber: nextInvoiceNumberData?.suggestedNextInvoiceNumber ?? ''
     }
   })
   const bankId = watch('bank')
   const taxId = watch('taxation')
   const shouldUseIgst = watch('shouldUseIgst')
+  const invoiceNumber = watch('invoiceNumber')
+  const debouncedInvoiceNumber = useDebounce(invoiceNumber, 1000)
+
+  useEffect(() => {
+    if ((debouncedInvoiceNumber as string)?.length && debouncedInvoiceNumber !== nextInvoiceNumberData?.suggestedNextInvoiceNumber) {
+      void fetchInvoiceByNumber({
+        variables: {
+          no: `${debouncedInvoiceNumber}`
+        }
+      })
+    }
+  }, [debouncedInvoiceNumber])
+
+  useEffect(() => {
+    if (invoiceNumberData) {
+      setError('invoiceNumber', {
+        message: 'This invoice number cannot be used, an invoice is already present with this number'
+      })
+      return
+    }
+    clearErrors('invoiceNumber')
+  }, [invoiceNumberData])
 
   return (
     <>
       <CreateInvoicePagesHeader
-        title="Final information"
+        title="Finalize Invoice"
         subtitle="Please complete the invoice by entering the invoice number, tax details, and bank account information."
       />
       <form
@@ -73,7 +105,14 @@ export default function AddMisc() {
                 : 'Must be a number. Default increment available for new values; do not use for past invoices.'
             }
           >
-            <Input {...register('invoiceNumber')} />
+            <div className="w-max h-max relative">
+              <Input {...register('invoiceNumber')} />
+              {isinvoiceNumberPresentLoading && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-max h-max flex items-center justify-center">
+                  <Loader className="w-4 h-4 animate-spin" />
+                </div>
+              )}
+            </div>
           </FormField>
           <FormField
             hasError={!!errors?.vehicleNumber}
