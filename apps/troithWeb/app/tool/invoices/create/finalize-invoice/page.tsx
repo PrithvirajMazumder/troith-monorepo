@@ -1,6 +1,7 @@
 'use client'
 import {
   Button,
+  Calendar,
   Checkbox,
   Dialog,
   DialogContent,
@@ -10,6 +11,9 @@ import {
   DialogTrigger,
   Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Separator,
   useDebounce
 } from '@troith/shared'
@@ -26,20 +30,26 @@ import { BankCard } from '@troithWeb/app/tool/components/bankCard'
 import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from '@troithWeb/app/tool/invoices/create/finalize-invoice/schemas'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
-import { ChevronRight, Loader } from 'lucide-react'
+import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
 import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
+import { GetInvoiceNumberWithNoQuery } from '@troithWeb/__generated__/graphql'
+import { format } from 'date-fns'
+import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
+import { useRouter } from 'next/navigation'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
+  const { setFinalInvoiceData } = useCreateInvoice()
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
   const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
-  const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isinvoiceNumberPresentLoading }] = useLazyQuery(
+  const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isInvoiceNumberPresentLoading }] = useLazyQuery(
     InvoiceQueries.getInvoiceNumberWithNo,
     {}
   )
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
+  const [isDatePopupOpen, setIsDatePopupOpen] = useState(false)
   const {
     setError,
     handleSubmit,
@@ -48,18 +58,22 @@ export default function AddMisc() {
     formState: { errors },
     watch,
     setValue,
-    trigger
+    trigger,
+    setFocus
   } = useForm<FinaliseInvoiceFormFields>({
     resolver: yupResolver(FinaliseInvoiceFormValidationSchema),
     defaultValues: {
       shouldUseIgst: false,
-      invoiceNumber: nextInvoiceNumberData?.suggestedNextInvoiceNumber ?? ''
+      invoiceNumber: nextInvoiceNumberData?.suggestedNextInvoiceNumber ?? '',
+      date: ''
     }
   })
+  const router = useRouter()
   const bankId = watch('bank')
   const taxId = watch('taxation')
   const shouldUseIgst = watch('shouldUseIgst')
   const invoiceNumber = watch('invoiceNumber')
+  const date = watch('date')
   const debouncedInvoiceNumber = useDebounce(invoiceNumber, 1000)
 
   useEffect(() => {
@@ -72,14 +86,20 @@ export default function AddMisc() {
     }
   }, [debouncedInvoiceNumber])
 
-  useEffect(() => {
+  const validateInvoiceNumber = (invoiceNumberData: GetInvoiceNumberWithNoQuery | null | undefined): boolean => {
     if (invoiceNumberData) {
       setError('invoiceNumber', {
         message: 'This invoice number cannot be used, an invoice is already present with this number'
       })
-      return
+      setFocus('invoiceNumber')
+      return false
     }
     clearErrors('invoiceNumber')
+    return true
+  }
+
+  useEffect(() => {
+    validateInvoiceNumber(invoiceNumberData)
   }, [invoiceNumberData])
 
   return (
@@ -90,7 +110,19 @@ export default function AddMisc() {
       />
       <form
         onSubmit={handleSubmit((data) => {
-          console.log(data)
+          if (!validateInvoiceNumber(invoiceNumberData)) return
+          const selectedBank = bankData?.banks?.find((bank) => bank.id === data.bank)
+          const selectedTax = taxationData?.taxes?.find((tax) => tax.id === data.taxation)
+          if (selectedBank && selectedTax) {
+            setFinalInvoiceData({
+              ...(data.vehicleNumber?.length && { vehicleNumber: data.vehicleNumber }),
+              bank: selectedBank,
+              date: data.date,
+              invoiceNumber: data.invoiceNumber,
+              tax: selectedTax
+            })
+            router.push('/tool/invoices/create/preview')
+          }
         })}
         id={FINALIZE_INVOICE_FORM_ID}
         className="flex flex-col gap-3 px-1 w-full"
@@ -107,7 +139,7 @@ export default function AddMisc() {
           >
             <div className="w-max h-max relative">
               <Input {...register('invoiceNumber')} />
-              {isinvoiceNumberPresentLoading && (
+              {isInvoiceNumberPresentLoading && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 w-max h-max flex items-center justify-center">
                   <Loader className="w-4 h-4 animate-spin" />
                 </div>
@@ -115,15 +147,31 @@ export default function AddMisc() {
             </div>
           </FormField>
           <FormField
-            hasError={!!errors?.vehicleNumber}
-            label="Vehicle number (optional)"
-            hint={
-              errors?.vehicleNumber?.message?.length
-                ? errors?.vehicleNumber?.message
-                : "For example: WB AA XXXX, MH 12 AA XXXX. Alternatively, you can provide other details, such as 'self.'"
-            }
+            hasError={!!errors?.date}
+            label="Date"
+            hint={errors?.date?.message?.length ? errors?.date?.message : 'This is the primary date of your invoice.'}
           >
-            <Input {...register('vehicleNumber')} />
+            <Popover open={isDatePopupOpen} onOpenChange={setIsDatePopupOpen}>
+              <PopoverTrigger asChild>
+                <Button variant={'outline'} className={cn('w-[280px] justify-start text-left font-normal', !date && 'text-muted-foreground')}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.length ? date : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={new Date(date)}
+                  onSelect={(date) => {
+                    if (date) {
+                      setValue('date', format(date, 'dd/MM/yyyy'))
+                      void trigger('date')
+                      setIsDatePopupOpen(false)
+                    }
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           </FormField>
         </div>
         <Separator decorative className="my-4" />
@@ -220,6 +268,19 @@ export default function AddMisc() {
             </DialogBody>
           </DialogContent>
         </Dialog>
+        <Separator className="my-4" />
+        <FormField
+          hasError={!!errors?.vehicleNumber}
+          label="Vechicle umber (optional)"
+          hint={
+            errors?.vehicleNumber?.message?.length
+              ? errors?.vehicleNumber?.message
+              : "For example: WB AA XXXX, MH 12 AA XXXX. Alternatively, you can provide other details, such as 'self.'"
+          }
+          className="w-[calc(50%-0.5rem)]"
+        >
+          <Input {...register('vehicleNumber')} />
+        </FormField>
       </form>
       <Button
         form={FINALIZE_INVOICE_FORM_ID}
