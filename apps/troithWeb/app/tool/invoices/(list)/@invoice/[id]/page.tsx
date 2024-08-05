@@ -6,6 +6,7 @@ import { cn } from '@troith/shared/lib/util'
 import { useSuspenseQuery } from '@apollo/client'
 import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
 import { generateInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateInvoice'
+import { Invoice as InvoiceType } from '@troithWeb/__generated__/graphql'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.detailsById, {
@@ -38,7 +39,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
         <Separator orientation="vertical" className="mx-2" />
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => invoiceData && generateInvoicePdf(invoiceData)}>
+            <Button variant="ghost" size="icon" onClick={() => invoiceData && generateInvoicePdf(invoiceData.invoice as InvoiceType).download()}>
               <Download className="h-4 w-4" />
             </Button>
           </TooltipTrigger>

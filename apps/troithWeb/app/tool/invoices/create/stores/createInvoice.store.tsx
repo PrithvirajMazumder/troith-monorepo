@@ -1,5 +1,5 @@
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
-import { Bank, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
+import { Bank, Invoice, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next/navigation'
 
 type FinalInvoicePayload = { date: string; invoiceNumber: number; vehicleNumber?: string; bank: Bank; tax: Tax }
@@ -21,6 +21,8 @@ type CreateInvoiceContextProps = {
   selectedInvoiceNumber: number | null
   setSelectedInvoiceNumber: Dispatch<SetStateAction<number | null>>
   setFinalInvoiceData: (data: FinalInvoicePayload) => void
+  createdInvoice: Invoice | null
+  setCreatedInvoice: Dispatch<SetStateAction<Invoice | null>>
 }
 
 const CreateInvoiceContext = createContext<CreateInvoiceContextProps>({} as CreateInvoiceContextProps)
@@ -34,6 +36,7 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedVehicleNumber, setSelectedVehicleNumber] = useState('')
   const [selectedInvoiceNumber, setSelectedInvoiceNumber] = useState<number | null>(null)
+  const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null)
   const router = useRouter()
 
   const setFinalInvoiceData = (data: FinalInvoicePayload) => {
@@ -52,6 +55,8 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   return (
     <CreateInvoiceContext.Provider
       value={{
+        createdInvoice,
+        setCreatedInvoice,
         selectedDate,
         selectedInvoiceNumber,
         selectedVehicleNumber,

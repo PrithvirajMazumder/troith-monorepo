@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -32,24 +33,29 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
 import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
 import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
-import { GetInvoiceNumberWithNoQuery } from '@troithWeb/__generated__/graphql'
+import { GetInvoiceNumberWithNoQuery, Invoice } from '@troithWeb/__generated__/graphql'
 import { format } from 'date-fns'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useRouter } from 'next/navigation'
+import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
+import { useToast } from '@troith/shared/hooks/use-toast'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
-  const { setFinalInvoiceData } = useCreateInvoice()
+  const { selectedParty, invoiceItems, setCreatedInvoice } = useCreateInvoice()
+  const router = useRouter()
+  const { toast } = useToast()
+  const { createInvoice, isInvoiceCreating } = useFinalizeInvoice()
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
   const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
   const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isInvoiceNumberPresentLoading }] = useLazyQuery(
-    InvoiceQueries.getInvoiceNumberWithNo,
-    {}
+    InvoiceQueries.getInvoiceNumberWithNo
   )
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
   const [isDatePopupOpen, setIsDatePopupOpen] = useState(false)
+  const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false)
   const {
     setError,
     handleSubmit,
@@ -68,7 +74,6 @@ export default function AddMisc() {
       date: ''
     }
   })
-  const router = useRouter()
   const bankId = watch('bank')
   const taxId = watch('taxation')
   const shouldUseIgst = watch('shouldUseIgst')
@@ -109,19 +114,36 @@ export default function AddMisc() {
         subtitle="Please complete the invoice by entering the invoice number, tax details, and bank account information."
       />
       <form
-        onSubmit={handleSubmit((data) => {
-          if (!validateInvoiceNumber(invoiceNumberData)) return
+        onSubmit={handleSubmit(async (data) => {
           const selectedBank = bankData?.banks?.find((bank) => bank.id === data.bank)
           const selectedTax = taxationData?.taxes?.find((tax) => tax.id === data.taxation)
           if (selectedBank && selectedTax) {
-            setFinalInvoiceData({
-              ...(data.vehicleNumber?.length && { vehicleNumber: data.vehicleNumber }),
-              bank: selectedBank,
-              date: data.date,
-              invoiceNumber: data.invoiceNumber,
-              tax: selectedTax
-            })
-            router.push('/tool/invoices/create/preview')
+            try {
+              const { data: newInvoiceData } = await createInvoice({
+                variables: {
+                  companyId: '658db32a6cf334fc362c9cad',
+                  date: new Date(data.date).toISOString(),
+                  vehicleNumber: data.vehicleNumber ?? '',
+                  bankId: data.bank,
+                  taxId: data.taxation,
+                  no: `${data.invoiceNumber}`,
+                  partyId: selectedParty?.id ?? '',
+                  invoiceItems: invoiceItems.map((invoiceItem) => ({
+                    itemId: invoiceItem.item?.id ?? '',
+                    price: invoiceItem.price,
+                    quantity: invoiceItem.quantity
+                  }))
+                }
+              })
+              setCreatedInvoice(newInvoiceData?.createInvoice as Invoice)
+              router.push('/tool/invoices/create/preview')
+            } catch (error) {
+              toast({
+                variant: 'destructive',
+                title: 'Uh oh! Something went wrong!',
+                description: 'Seems like this invoice can be created right now.'
+              })
+            }
           }
         })}
         id={FINALIZE_INVOICE_FORM_ID}
@@ -137,7 +159,7 @@ export default function AddMisc() {
                 : 'Must be a number. Default increment available for new values; do not use for past invoices.'
             }
           >
-            <div className="w-max h-max relative">
+            <div className="h-max relative w-full">
               <Input {...register('invoiceNumber')} />
               {isInvoiceNumberPresentLoading && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 w-max h-max flex items-center justify-center">
@@ -283,13 +305,36 @@ export default function AddMisc() {
         </FormField>
       </form>
       <Button
-        form={FINALIZE_INVOICE_FORM_ID}
+        onClick={async () => {
+          if (!validateInvoiceNumber(invoiceNumberData)) return
+          const isValid = await trigger()
+          if (isValid) {
+            setIsConfirmationPopupOpen(true)
+          }
+        }}
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
       >
         Submit
         <ChevronRight className="h-4 w-4 ml-2" />
       </Button>
+      <Dialog open={isConfirmationPopupOpen} onOpenChange={setIsConfirmationPopupOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm submission</DialogTitle>
+            <DialogDescription>Are you sure you want to create this invoice?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button disabled={isInvoiceCreating} variant="ghost" onClick={() => setIsConfirmationPopupOpen(false)}>
+              No
+            </Button>
+            <Button form={FINALIZE_INVOICE_FORM_ID} disabled={isInvoiceCreating}>
+              {isInvoiceCreating && <Loader className="mr-2 animate-spin w-4 h-4" />}
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

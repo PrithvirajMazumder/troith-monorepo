@@ -3,7 +3,8 @@ import './global.css'
 import { PropsWithChildren } from 'react'
 import { Inter as FontSans } from 'next/font/google'
 import { cn } from '@troith/shared/lib/util'
-import { ThemeProvider } from '@troith/shared'
+import { ThemeProvider, Toaster } from '@troith/shared'
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <div className="container mx-auto">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
+            <ProgressBar height="5px" color="#000000" options={{ showSpinner: false }} />
           </ThemeProvider>
+          <Toaster />
         </div>
       </body>
     </html>
