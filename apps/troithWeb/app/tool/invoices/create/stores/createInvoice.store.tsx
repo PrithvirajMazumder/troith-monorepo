@@ -1,3 +1,4 @@
+'use client'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
 import { Bank, Invoice, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next/navigation'

@@ -126,7 +126,7 @@ export default function AddMisc() {
                   vehicleNumber: data.vehicleNumber ?? '',
                   bankId: data.bank,
                   taxId: data.taxation,
-                  no: `${data.invoiceNumber}`,
+                  no: data.invoiceNumber,
                   partyId: selectedParty?.id ?? '',
                   invoiceItems: invoiceItems.map((invoiceItem) => ({
                     itemId: invoiceItem.item?.id ?? '',
@@ -175,7 +175,7 @@ export default function AddMisc() {
           >
             <Popover open={isDatePopupOpen} onOpenChange={setIsDatePopupOpen}>
               <PopoverTrigger asChild>
-                <Button variant={'outline'} className={cn('w-[280px] justify-start text-left font-normal', !date && 'text-muted-foreground')}>
+                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal', !date && 'text-muted-foreground')}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date?.length ? date : <span>Pick a date</span>}
                 </Button>

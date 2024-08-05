@@ -8,7 +8,7 @@ export const InvoiceMutations = {
   $vehicleNumber: String!
   $companyId: String!
   $taxId: String!
-  $no: String!
+  $no: Int!
   $bankId: String!
 ) {
   createInvoice(

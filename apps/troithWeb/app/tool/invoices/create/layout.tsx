@@ -51,7 +51,7 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
                 <BreadcrumbLink asChild>
                   <Link href="/tool/invoices/create/choose-items">Choose Items</Link>
                 </BreadcrumbLink>
-              )}{' '}
+              )}
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -61,7 +61,7 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
                 <BreadcrumbLink asChild>
                   <Link href="/tool/invoices/create/configure-invoice-items">Configure Invoice Items</Link>
                 </BreadcrumbLink>
-              )}{' '}
+              )}
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

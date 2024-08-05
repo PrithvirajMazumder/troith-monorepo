@@ -1,5 +1,5 @@
 'use client'
-import { Button, buttonVariants, P, ScrollArea, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
+import { Button, buttonVariants, H3, P, ScrollArea, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@troith/shared'
 import { Download, Eye, Pencil, Trash, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
@@ -7,11 +7,25 @@ import { useSuspenseQuery } from '@apollo/client'
 import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
 import { generateInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateInvoice'
 import { Invoice as InvoiceType } from '@troithWeb/__generated__/graphql'
+import { pdfjs, Document, Page } from 'react-pdf'
+import { useEffect, useState } from 'react'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
+  const [totalPages, setTotalPages] = useState<number>(0)
+  const [showPdf, setShowPdf] = useState(false)
+  const [pdfBase64, setPdfBase64] = useState<string>('')
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.detailsById, {
     variables: { invoiceId }
   })
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
+
+  useEffect(() => {
+    if (invoiceData) {
+      generateInvoicePdf(invoiceData?.invoice as InvoiceType).getBase64((pdfBase64) => {
+        setPdfBase64(pdfBase64)
+      })
+    }
+  }, [invoiceData])
 
   return (
     <>
@@ -71,7 +85,29 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
           </Tooltip>
         </div>
       </header>
-      <ScrollArea className="h-full p-6">Invoice: {invoiceId}</ScrollArea>
+      <ScrollArea className="h-full p-6">
+        <H3>Invoice: {invoiceId}</H3>
+        {pdfBase64?.length ? (
+          <Document
+            file={`data:application/pdf;base64,${pdfBase64}`}
+            onLoadSuccess={(pdf) => {
+              setTotalPages(pdf.numPages)
+            }}
+          >
+            {Array.from({ length: totalPages }).map((it, index) => {
+              return (
+                <Page
+                  key={`page-${index}`}
+                  className={`h-[29rem]  md:h-[56rem] overflow-hidden`}
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              )
+            })}
+          </Document>
+        ) : null}
+      </ScrollArea>
     </>
   )
 }
