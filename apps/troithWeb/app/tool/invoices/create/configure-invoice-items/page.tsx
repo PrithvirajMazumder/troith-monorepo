@@ -4,10 +4,10 @@ import { InvoiceItem } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
-import { useRouter } from 'next/navigation'
 import { ConfigureInvoiceItemCard } from '@troithWeb/app/tool/components/configureInvoiceItemCard'
 import { useState } from 'react'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
+import { useRouter } from 'next-nprogress-bar'
 
 export default function ConfigureInvoiceItems() {
   const { selectedItems, setInvoiceItems: setSelectedInvoiceItems } = useCreateInvoice()
@@ -46,7 +46,13 @@ export default function ConfigureInvoiceItems() {
         variant="default"
         onClick={() => {
           setSelectedInvoiceItems([...invoiceItems])
-          router.push('/tool/invoices/create/finalize-invoice')
+          router.push(
+            '/tool/invoices/create/finalize-invoice',
+            {},
+            {
+              showProgressBar: true
+            }
+          )
         }}
       >
         Continue

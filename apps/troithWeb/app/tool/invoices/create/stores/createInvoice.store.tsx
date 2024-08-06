@@ -1,7 +1,7 @@
 'use client'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
 import { Bank, Invoice, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next-nprogress-bar'
 
 type FinalInvoicePayload = { date: string; invoiceNumber: number; vehicleNumber?: string; bank: Bank; tax: Tax }
 type CreateInvoiceContextProps = {
@@ -49,7 +49,13 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     if (!selectedParty) {
-      router.replace('/tool/invoices/create')
+      router.replace(
+        '/tool/invoices/create',
+        {},
+        {
+          showProgressBar: true
+        }
+      )
     }
   }, [selectedParty])
 

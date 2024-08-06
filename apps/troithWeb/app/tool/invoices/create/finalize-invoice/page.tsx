@@ -36,9 +36,9 @@ import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQuer
 import { GetInvoiceNumberWithNoQuery, Invoice } from '@troithWeb/__generated__/graphql'
 import { format } from 'date-fns'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
-import { useRouter } from 'next/navigation'
 import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
 import { useToast } from '@troith/shared/hooks/use-toast'
+import { useRouter } from 'next-nprogress-bar'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
@@ -136,7 +136,13 @@ export default function AddMisc() {
                 }
               })
               setCreatedInvoice(newInvoiceData?.createInvoice as Invoice)
-              router.push('/tool/invoices/create/preview')
+              router.push(
+                `/tool/invoices/${newInvoiceData?.createInvoice?.id}`,
+                {},
+                {
+                  showProgressBar: true
+                }
+              )
             } catch (error) {
               toast({
                 variant: 'destructive',

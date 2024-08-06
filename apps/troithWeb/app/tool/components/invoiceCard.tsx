@@ -40,8 +40,12 @@ export const InvoiceCard = ({ invoice }: Props) => {
         </div>
         <div className="flex items-center gap-2 h-4 mb-2">
           <div className="text-xs font-medium">{format(invoice?.date, 'dd/MM/yyyy')}</div>
-          <Separator orientation="vertical" />
-          <div className="text-xs font-medium">{invoice?.vehicleNumber}</div>
+          {invoice?.vehicleNumber?.length ? (
+            <>
+              <Separator orientation="vertical" />
+              <div className="text-xs font-medium">{invoice?.vehicleNumber}</div>
+            </>
+          ) : null}
           <Separator orientation="vertical" />
           <div className="text-xs font-medium">{invoice?.invoiceItems?.length} Items</div>
         </div>

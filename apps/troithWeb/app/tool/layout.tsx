@@ -24,7 +24,7 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
   return (
     <ApolloWrapper>
       <TooltipProvider>
-        <ResizablePanelGroup direction="horizontal" className="!h-screen border-r">
+        <ResizablePanelGroup autoSaveId="TOOL_ROOT_LAYOUT_REZIABLE_PANEL" direction="horizontal" className="!h-screen border-r">
           <ResizablePanel
             onCollapse={() => setIsCollapsed(true)}
             onExpand={() => setIsCollapsed(false)}

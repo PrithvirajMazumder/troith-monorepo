@@ -14,14 +14,16 @@ import {
   ScrollArea
 } from '@troith/shared'
 import { X } from 'lucide-react'
-import { PropsWithChildren } from 'react'
+import { PropsWithChildren, useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
 import { usePathname } from 'next/navigation'
 import { CreateInvoiceProvider } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
+import { CreateInvoiceSidePanelInfo } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo'
 
 export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
   const pathname = usePathname()
+  const [sidePanelWidth, setSidePanelWidth] = useState<number>(0)
 
   return (
     <CreateInvoiceProvider>
@@ -86,15 +88,15 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <ResizablePanelGroup direction="horizontal" className=" h-full w-full">
-        <ResizablePanel defaultSize={60} minSize={60} maxSize={80}>
+      <ResizablePanelGroup autoSaveId="CREATE_INVOICE_FORM_REZISABLE_FORM" direction="horizontal" className=" h-full w-full">
+        <ResizablePanel defaultSize={70} minSize={70} maxSize={80}>
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{children}</ScrollArea>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={40} maxSize={40} minSize={20}>
-          <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Content</span>
-          </div>
+        <ResizablePanel onResize={setSidePanelWidth} defaultSize={30} maxSize={30} minSize={20}>
+          <ScrollArea className="pt-4 pb-20 h-full w-full relative">
+            <CreateInvoiceSidePanelInfo panelWidth={sidePanelWidth} />
+          </ScrollArea>
         </ResizablePanel>
       </ResizablePanelGroup>
     </CreateInvoiceProvider>

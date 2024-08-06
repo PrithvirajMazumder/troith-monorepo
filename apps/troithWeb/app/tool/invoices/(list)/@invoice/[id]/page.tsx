@@ -5,14 +5,13 @@ import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
 import { useSuspenseQuery } from '@apollo/client'
 import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
-import { generateInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateInvoice'
 import { Invoice as InvoiceType } from '@troithWeb/__generated__/graphql'
-import { pdfjs, Document, Page } from 'react-pdf'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { useEffect, useState } from 'react'
+import { generateCompleteInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateCompleteInvoice'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
   const [totalPages, setTotalPages] = useState<number>(0)
-  const [showPdf, setShowPdf] = useState(false)
   const [pdfBase64, setPdfBase64] = useState<string>('')
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.detailsById, {
     variables: { invoiceId }
@@ -21,7 +20,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
 
   useEffect(() => {
     if (invoiceData) {
-      generateInvoicePdf(invoiceData?.invoice as InvoiceType).getBase64((pdfBase64) => {
+      generateCompleteInvoicePdf(invoiceData?.invoice as InvoiceType).getBase64((pdfBase64) => {
         setPdfBase64(pdfBase64)
       })
     }
@@ -53,7 +52,11 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
         <Separator orientation="vertical" className="mx-2" />
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => invoiceData && generateInvoicePdf(invoiceData.invoice as InvoiceType).download()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => invoiceData && generateCompleteInvoicePdf(invoiceData.invoice as InvoiceType).download()}
+            >
               <Download className="h-4 w-4" />
             </Button>
           </TooltipTrigger>

@@ -3,19 +3,22 @@ import { useSuspenseQuery } from '@apollo/client'
 import { ItemQueries } from '@troithWeb/app/tool/items/queries/itemQueries'
 import { ItemCard } from '@troithWeb/app/tool/components/itemCard'
 import { Item } from '@troithWeb/__generated__/graphql'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, H3 } from '@troith/shared'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from '@troith/shared'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
+import { useState } from 'react'
+import { useRouter } from 'next-nprogress-bar'
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'
+  const [selectedItems, setSelectedItems] = useState<Item[]>([])
   const { data: itemsData } = useSuspenseQuery(ItemQueries.itemsByCompanyId, {
     variables: { companyId: '658db32a6cf334fc362c9cad' }
   })
-  const { selectedParty, setSelectedItems, selectedItems } = useCreateInvoice()
+  const { selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
+
   const router = useRouter()
 
   const handleItemSelection = (item: Item) => {
@@ -66,7 +69,14 @@ export default function SelectItemsCreateInvoicePage() {
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
         onClick={() => {
-          router.push('/tool/invoices/create/configure-invoice-items')
+          setFinalSelectedItems(selectedItems)
+          router.push(
+            '/tool/invoices/create/configure-invoice-items',
+            {},
+            {
+              showProgressBar: true
+            }
+          )
         }}
       >
         Continue

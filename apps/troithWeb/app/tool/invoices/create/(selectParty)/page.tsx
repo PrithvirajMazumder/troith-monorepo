@@ -5,8 +5,8 @@ import { H4, Separator } from '@troith/shared'
 import { PartyCard } from '@troithWeb/app/tool/components/partyCard'
 import { Party } from '@troithWeb/__generated__/graphql'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
-import { useRouter } from 'next/navigation'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
+import { useRouter } from 'next-nprogress-bar'
 
 export default function SelectPartyCreateInvoicePage() {
   const router = useRouter()
@@ -17,7 +17,13 @@ export default function SelectPartyCreateInvoicePage() {
 
   const handlePartySelection = (party: Party) => {
     setSelectedParty(party)
-    void router.replace('/tool/invoices/create/choose-items')
+    void router.replace(
+      '/tool/invoices/create/choose-items',
+      {},
+      {
+        showProgressBar: true
+      }
+    )
   }
 
   return (

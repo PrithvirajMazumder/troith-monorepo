@@ -5,14 +5,14 @@ import { CheckCircle } from 'lucide-react'
 
 type Props = {
   party: Party
-  onSelect: (party: Party) => void
+  onSelect?: (party: Party) => void
   isSelected?: boolean
 }
 
 export const PartyCard = ({ party, onSelect, isSelected = false }: Props) => {
   return (
     <div
-      onClick={() => onSelect(party)}
+      onClick={() => onSelect && onSelect(party)}
       className={cn('flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all w-full', `hover:bg-zinc-800/10`)}
     >
       <div className="flex flex-1 flex-col gap-1">
