@@ -8,17 +8,19 @@ import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/cre
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next-nprogress-bar'
+
+type ItemsMap = { [key: string]: Item }
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'
-  const [selectedItems, setSelectedItems] = useState<Item[]>([])
+  const { selectedItems: previouslySelectedItems, selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
+  const [selectedItems, setSelectedItems] = useState<Item[]>(previouslySelectedItems)
+  const [selectedItemsMap, setSelectedItemsMap] = useState<ItemsMap>({} as ItemsMap)
   const { data: itemsData } = useSuspenseQuery(ItemQueries.itemsByCompanyId, {
     variables: { companyId: '658db32a6cf334fc362c9cad' }
   })
-  const { selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
-
   const router = useRouter()
 
   const handleItemSelection = (item: Item) => {
@@ -29,6 +31,16 @@ export default function SelectItemsCreateInvoicePage() {
 
     setSelectedItems([...selectedItems, item])
   }
+
+  useEffect(() => {
+    const selectedItemsMap: ItemsMap = {}
+    if (selectedItems?.length) {
+      selectedItems?.forEach((selectedItem) => {
+        selectedItemsMap[selectedItem.id] = selectedItem
+      })
+    }
+    setSelectedItemsMap(selectedItemsMap)
+  }, [selectedItems])
 
   return (
     <>
@@ -41,12 +53,7 @@ export default function SelectItemsCreateInvoicePage() {
               {itemsData?.items
                 ?.filter((item) => selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
                 ?.map((item) => (
-                  <ItemCard
-                    isSelected={!!selectedItems.find((selectedItem) => selectedItem.id === item.id)}
-                    item={item as Item}
-                    key={item?.id}
-                    onSelect={handleItemSelection}
-                  />
+                  <ItemCard isSelected={!!selectedItemsMap[item.id]} item={item as Item} key={item?.id} onSelect={handleItemSelection} />
                 ))}
             </AccordionContent>
           </AccordionItem>
@@ -56,12 +63,7 @@ export default function SelectItemsCreateInvoicePage() {
         {itemsData?.items
           ?.filter((item) => !selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
           ?.map((item) => (
-            <ItemCard
-              isSelected={!!selectedItems.find((selectedItem) => selectedItem.id === item.id)}
-              item={item as Item}
-              key={item?.id}
-              onSelect={handleItemSelection}
-            />
+            <ItemCard isSelected={!!selectedItemsMap[item.id]} item={item as Item} key={item?.id} onSelect={handleItemSelection} />
           ))}
       </div>
       <Button

@@ -25,7 +25,7 @@ export const NavMenu = ({ children, variant = 'ghost', className, iconOnly = fal
               variant === 'default' && 'dark:bg-muted dark:text-white dark:hover:bg-muted'
             )}
           >
-            {props.icon ? <props.icon className="h-5 w-5" /> : null}
+            {props.icon ? <props.icon className="h-5 w-5 min-h-5 min-w-5" /> : null}
           </Link>
         </TooltipTrigger>
         <TooltipContent side="right">
@@ -46,7 +46,7 @@ export const NavMenu = ({ children, variant = 'ghost', className, iconOnly = fal
         variant === 'default' && 'dark:bg-muted dark:text-white dark:hover:bg-muted'
       )}
     >
-      {props.icon ? <props.icon className="mr-2 h-5 w-5" /> : null}
+      {props.icon ? <props.icon className="mr-2 h-5 w-5 min-h-5 min-w-5" /> : null}
       {children}
     </Link>
   )

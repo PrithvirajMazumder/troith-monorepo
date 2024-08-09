@@ -9,7 +9,8 @@ import { cn } from '@troith/shared/lib/util'
 
 export default function Invoices() {
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.allByCompanyId, {
-    variables: { companyId: '658db32a6cf334fc362c9cad' }
+    variables: { companyId: '658db32a6cf334fc362c9cad' },
+    fetchPolicy: 'network-only'
   })
 
   return (

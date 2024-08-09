@@ -93,7 +93,7 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{children}</ScrollArea>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel onResize={setSidePanelWidth} defaultSize={30} maxSize={30} minSize={20}>
+        <ResizablePanel className="bg-gray-50 dark:bg-zinc-900/20" onResize={setSidePanelWidth} defaultSize={30} maxSize={30} minSize={20}>
           <ScrollArea className="pt-4 pb-20 h-full w-full relative">
             <CreateInvoiceSidePanelInfo panelWidth={sidePanelWidth} />
           </ScrollArea>

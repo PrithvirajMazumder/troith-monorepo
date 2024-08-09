@@ -8,6 +8,7 @@ import { TDocumentDefinitions } from 'pdfmake/interfaces'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { getDecimalPart } from '@troithWeb/utils/number'
 import { format } from 'date-fns'
+import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
@@ -97,14 +98,12 @@ const putInvoiceItems = ({ invoiceItems }: Pick<Invoice, 'invoiceItems'>, pdf: T
   }
 }
 
-const putFinalInvoiceInfo = (invoice: Omit<Invoice, 'party' | 'company' | 'status' | 'id'>, basePdf: TDocumentDefinitions) => {
+const putFinalInvoiceInfo = (invoice: Partial<Omit<Invoice, 'party' | 'company' | 'status' | 'id'>>, basePdf: TDocumentDefinitions) => {
   const newPdf = { ...basePdf }
-  const grossTotal = getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems)
-  const sgst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * (invoice?.tax?.sgst ?? 0)) / 100
-  const cgst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * (invoice?.tax?.cgst ?? 0)) / 100
-  const igst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * ((invoice?.tax?.cgst ?? 0) + (invoice?.tax?.sgst ?? 0))) / 100
-  const roundOff = parseInt(`0.${getDecimalPart(grossTotal + cgst + sgst)}`).toFixed(2)
-  const netTotal = Math.floor(grossTotal + cgst + sgst)
+  const { cgst, grossTotal, igst, netTotal, roundOff, sgst } = getInvoiceTotals({
+    invoiceItems: invoice.invoiceItems ?? [],
+    tax: invoice.tax
+  })
 
   // @ts-expect-error while copying content becomes un-iterable
   const thirdSection = newPdf.content[2].table
@@ -114,19 +113,22 @@ const putFinalInvoiceInfo = (invoice: Omit<Invoice, 'party' | 'company' | 'statu
   thirdSection.body[4][3].text = convertAmountToInr(roundOff, false)
   thirdSection.body[5][3].text = convertAmountToInr(netTotal, false)
   const bankSection = thirdSection.body[0][1].stack
-  bankSection[2].text = invoice?.bank?.accountNumber
-  bankSection[4].text = invoice.bank?.ifsc?.toUpperCase()
-  bankSection[6].text = capitalize(invoice.bank?.name ?? '')
-  bankSection[8].text = capitalize(invoice.bank?.branch ?? '')
+  if (invoice?.bank) {
+    bankSection[2].text = invoice?.bank?.accountNumber
+    bankSection[4].text = invoice.bank?.ifsc?.toUpperCase()
+    bankSection[6].text = capitalize(invoice.bank?.name ?? '')
+    bankSection[8].text = capitalize(invoice.bank?.branch ?? '')
+  }
   // @ts-expect-error while copying content becomes un-iterable
   const firstSection = newPdf.content[0].table
   firstSection.body[0][2].stack[4] = `Vehicle No: ${invoice?.vehicleNumber}`
-  firstSection.body[3][2] = `Invoice No: ${invoice?.no}`
-  firstSection.body[4][2] = `Date: ${format(invoice?.date, 'dd/MM/yyyy')}`
+  firstSection.body[3][2] = `Invoice No: ${invoice?.no ? invoice?.no : ''}`
+  firstSection.body[4][2] = `Date: ${invoice?.date?.length ? format(invoice?.date, 'dd/MM/yyyy') : ''}`
 
   return {
     generate: () => generate(newPdf),
     putPartyData: (party: Pick<Invoice, 'party'>) => putPartyData(party, newPdf),
+    putInvoiceItems: (invoiceItems: Pick<Invoice, 'invoiceItems'>) => putInvoiceItems(invoiceItems, newPdf),
     highlightInvoiceItems: () => highlights.invoiceItems(newPdf),
     highlightFinalInvoiceInfo: () => highlights.finalInvoiceInfo(newPdf),
     highlightParty: () => highlights.party(newPdf)
@@ -401,7 +403,7 @@ export const getBaseInvoicePdf = ({ company }: Pick<Invoice, 'company'>) => {
     generate: () => generate(basePdf),
     putPartyData: (party: Pick<Invoice, 'party'>) => putPartyData(party, basePdf),
     putInvoiceItems: (invoiceItems: Pick<Invoice, 'invoiceItems'>) => putInvoiceItems(invoiceItems, basePdf),
-    putFinalInvoiceInfo: (invoice: Omit<Invoice, 'party' | 'company' | 'status' | 'id'>) => putFinalInvoiceInfo(invoice, basePdf),
+    putFinalInvoiceInfo: (invoice: Partial<Omit<Invoice, 'party' | 'company' | 'status' | 'id'>>) => putFinalInvoiceInfo(invoice, basePdf),
     highlightParty: () => highlights.party(basePdf),
     highlightInvoiceItems: () => highlights.invoiceItems(basePdf),
     highlightFinalInvoiceInfo: () => highlights.finalInvoiceInfo(basePdf)

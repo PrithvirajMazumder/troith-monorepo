@@ -11,8 +11,8 @@ type Props = {
 }
 
 export const ConfigureInvoiceItemCard = ({ invoiceItem, ...props }: Props) => {
-  const [quantity, setQuantity] = useState<number | null>(null)
-  const [price, setPrice] = useState<number | null>(null)
+  const [quantity, setQuantity] = useState<number | null>(invoiceItem.quantity > 0 ? invoiceItem.quantity : null)
+  const [price, setPrice] = useState<number | null>(invoiceItem.price > 0 ? invoiceItem.price : null)
 
   useEffect(() => {
     if (price && quantity && (price ?? 0) * (quantity ?? 0) > 0) {

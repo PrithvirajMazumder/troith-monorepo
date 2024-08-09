@@ -42,7 +42,8 @@ import { useRouter } from 'next-nprogress-bar'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
-  const { selectedParty, invoiceItems, setCreatedInvoice } = useCreateInvoice()
+  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate, setSelectedInvoiceNumber } =
+    useCreateInvoice()
   const router = useRouter()
   const { toast } = useToast()
   const { createInvoice, isInvoiceCreating } = useFinalizeInvoice()
@@ -192,6 +193,7 @@ export default function AddMisc() {
                   selected={new Date(date)}
                   onSelect={(date) => {
                     if (date) {
+                      setSelectedDate(date.toISOString())
                       setValue('date', format(date, 'dd/MM/yyyy'))
                       void trigger('date')
                       setIsDatePopupOpen(false)
@@ -236,6 +238,7 @@ export default function AddMisc() {
                   <TaxCard
                     tax={tax}
                     onSelect={(tax) => {
+                      setSelectedTax(tax)
                       setValue('taxation', tax.id ?? '')
                       setIsTaxationDialogOpen(false)
                       void trigger('taxation')
@@ -285,6 +288,7 @@ export default function AddMisc() {
                     isCompact
                     bank={bank}
                     onSelect={(bank) => {
+                      setSelectedBank(bank)
                       setValue('bank', bank.id)
                       setIsBankDialogOpen(false)
                       void trigger('bank')

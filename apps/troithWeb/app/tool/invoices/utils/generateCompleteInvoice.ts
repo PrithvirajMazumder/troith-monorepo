@@ -31,16 +31,17 @@ export const generateCompleteInvoicePdf = (invoice: Invoice) => {
   const roundOff = parseInt(`0.${getDecimalPart(grossTotal + cgst + sgst)}`).toFixed(2)
   const netTotal = Math.floor(grossTotal + cgst + sgst)
 
-  const items = invoice?.invoiceItems?.map((invoiceItem, index) => [
-    index + 1,
-    invoiceItem?.item?.name ?? '',
-    invoiceItem?.item?.hsn ?? '',
-    `${invoiceItem?.quantity} ${invoiceItem?.item?.uom?.abbreviation}`,
-    {
-      text: `${convertAmountToInr(invoiceItem?.price, false)}`,
-      alignment: 'right'
-    }
-  ])
+  const items =
+    invoice?.invoiceItems?.map((invoiceItem, index) => [
+      index + 1,
+      invoiceItem?.item?.name ?? '',
+      invoiceItem?.item?.hsn ?? '',
+      `${invoiceItem?.quantity} ${invoiceItem?.item?.uom?.abbreviation}`,
+      {
+        text: `${convertAmountToInr(invoiceItem?.price, false)}`,
+        alignment: 'right'
+      }
+    ]) ?? []
   return pdfMake.createPdf({
     pageSize: 'A4',
     content: [
@@ -121,7 +122,7 @@ export const generateCompleteInvoicePdf = (invoice: Invoice) => {
                 colSpan: 2
               },
               '',
-              `Date: ${format(invoice?.date, 'dd/MM/yyyy')}`,
+              `Date: ${invoice?.date?.length ? format(invoice?.date, 'dd/MM/yyyy') : ''}`,
               `GSTIN: ${invoice?.party?.gstin}`
             ]
           ]
@@ -173,25 +174,25 @@ export const generateCompleteInvoicePdf = (invoice: Invoice) => {
                     text: 'Account number:'
                   },
                   {
-                    text: invoice.bank?.accountNumber
+                    text: invoice?.bank?.accountNumber
                   },
                   {
                     text: 'IFSC:'
                   },
                   {
-                    text: invoice.bank?.ifsc?.toUpperCase()
+                    text: invoice?.bank?.ifsc?.toUpperCase()
                   },
                   {
                     text: 'Name:'
                   },
                   {
-                    text: capitalize(invoice.bank?.name ?? '')
+                    text: capitalize(invoice?.bank?.name ?? '')
                   },
                   {
                     text: 'Branch:'
                   },
                   {
-                    text: capitalize(invoice.bank?.branch ?? '')
+                    text: capitalize(invoice?.bank?.branch ?? '')
                   }
                 ],
                 rowSpan: 7

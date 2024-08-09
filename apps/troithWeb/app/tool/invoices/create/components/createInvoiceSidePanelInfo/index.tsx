@@ -1,24 +1,40 @@
 'use client'
 import { Invoice } from '@troithWeb/__generated__/graphql'
-import { Document, Page, pdfjs } from 'react-pdf'
 import { useEffect, useRef, useState } from 'react'
 import { getBaseInvoicePdf } from '@troithWeb/app/tool/invoices/create/utils/generateHalfPdf'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
-import { H4, ScrollArea, Separator } from '@troith/shared'
-import { Zap } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogPortal,
+  DialogTitle,
+  H4,
+  P,
+  PdfViewer,
+  ScrollArea,
+  Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@troith/shared'
+import { MousePointerClick, Zap } from 'lucide-react'
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
+import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
+import { convertAmountToInr } from '@troithWeb/utils/currency'
+import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 
 type Props = {
   panelWidth: number
 }
 
 export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
-  const { selectedParty, selectedItems, invoiceItems } = useCreateInvoice()
-  const [totalPages, setTotalPages] = useState<number>(0)
+  const { selectedParty, selectedItems, invoiceItems, selectedBank, selectedDate, selectedInvoiceNumber, selectedTax } = useCreateInvoice()
   const [pdfBase64, setPdfBase64] = useState<string>('')
   const [pdfContainerWidth, setPdfContainerWidth] = useState(0)
+  const [isExpandedDialogOpen, setIsExpandedDialogOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
+  const pdfExpandedDialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const basePdf = getBaseInvoicePdf({
@@ -34,6 +50,13 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
     } as Pick<Invoice, 'company'>)
     if (invoiceItems?.length && selectedParty) {
       basePdf
+        .putFinalInvoiceInfo({
+          bank: selectedBank,
+          tax: selectedTax,
+          invoiceItems: invoiceItems,
+          date: selectedDate,
+          no: selectedInvoiceNumber ?? undefined
+        })
         .putInvoiceItems({
           invoiceItems
         })
@@ -79,88 +102,143 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
       .getBase64((pdfBase64) => {
         setPdfBase64(pdfBase64)
       })
-  }, [selectedParty, selectedItems, invoiceItems])
+  }, [selectedParty, selectedItems, invoiceItems, selectedBank, selectedDate, selectedTax, selectedInvoiceNumber])
 
   useEffect(() => {
     setPdfContainerWidth(containerRef?.current?.clientWidth ?? 0)
   }, [panelWidth])
 
   return (
-    <div className="h-[calc(100svh-117px)] pb-4 flex flex-col gap-4 px-4">
-      <ScrollArea className="border-b flex-1">
-        <H4>Progress</H4>
-        <p className="text-xs text-muted-foreground">Here you can see the live update of all the selected info for creating this new invoice.</p>
-        <Separator className="my-4" />
-        {selectedParty && (
-          <div className="flex border rounded-lg flex-col items-start border-dashed">
-            <span className="p-2">
-              <p className="text-[12px] underline decoration-dashed text-muted-foreground">Party</p>
-              <p className="text-lg font-semibold">{selectedParty?.name}</p>
-              <p className="text-sm text-muted-foreground italic">GSTIN: {selectedParty?.gstin}</p>
-            </span>
-            {selectedItems?.length ? (
-              <>
-                <Separator />
-                <span className="p-2 w-full">
-                  <p className="text-[12px] underline decoration-dashed text-muted-foreground">Items</p>
-                  {!invoiceItems?.length
-                    ? selectedItems.map((item) => (
-                        <CreateInvoiceSidePanelInvoiceItemList
-                          key={`sneak-peak-create-invoice-item-${item.id}`}
-                          invoiceItem={{
-                            item,
-                            price: 0,
-                            quantity: 0
-                          }}
-                        />
-                      ))
-                    : invoiceItems.map((invoiceItem) => (
-                        <CreateInvoiceSidePanelInvoiceItemList
-                          key={`sneak-peak-create-invoice-item-${invoiceItem?.item?.id}`}
-                          invoiceItem={{
-                            item: invoiceItem?.item,
-                            price: invoiceItem?.price,
-                            quantity: invoiceItem?.quantity
-                          }}
-                        />
-                      ))}
-                </span>
-              </>
-            ) : null}
-          </div>
-        )}
-      </ScrollArea>
-      <div>
-        <H4 className="flex items-center gap-1">
-          PDF live feed <Zap className="w-4 h-4 text-yellow-500" />
-        </H4>
-        <p className="text-xs text-muted-foreground">Highlighted places will be filled with the info on this page</p>
-      </div>
-      <div ref={containerRef} className="h-max w-full rounded overflow-x-hidden overflow-y-scroll dark:opacity-90">
-        {pdfBase64?.length ? (
-          <Document
-            className="border border-dashed overflow-y-scroll rounded-lg min-h-[20rem]"
-            key={panelWidth + 'create-invoice-side-info-panel'}
-            file={`data:application/pdf;base64,${pdfBase64}`}
-            onLoadSuccess={(pdf) => {
-              setTotalPages(pdf.numPages)
-            }}
-          >
-            {Array.from({ length: totalPages }).map((_, index) => {
-              return (
-                <Page
-                  width={pdfContainerWidth}
-                  key={`create-invoice-pdf-page-${index}`}
-                  className="h-[20rem]"
-                  pageNumber={index + 1}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
+    <>
+      <div className="h-[calc(100svh-117px)] pb-4 flex flex-col gap-4 px-4">
+        <ScrollArea className="border-b flex-1">
+          <H4>Progress</H4>
+          <p className="text-xs text-muted-foreground mb-4">
+            Here you can see the live update of all the selected info for creating this new invoice.
+          </p>
+          {selectedParty && (
+            <div className="flex border rounded-lg flex-col bg-background items-start border-dashed">
+              <span className="p-4">
+                <p className="text-[12px] underline decoration-dashed text-muted-foreground">Party</p>
+                <p className="text-lg font-semibold">{selectedParty?.name}</p>
+                <p className="text-sm text-muted-foreground italic">GSTIN: {selectedParty?.gstin}</p>
+              </span>
+              {selectedItems?.length ? (
+                <>
+                  <Separator />
+                  <span className="p-4 w-full">
+                    <p className="text-[12px] underline decoration-dashed text-muted-foreground">Items</p>
+                    {!invoiceItems?.length
+                      ? selectedItems.map((item) => (
+                          <CreateInvoiceSidePanelInvoiceItemList
+                            key={`sneak-peak-create-invoice-item-${item.id}`}
+                            invoiceItem={{
+                              item,
+                              price: 0,
+                              quantity: 0
+                            }}
+                          />
+                        ))
+                      : invoiceItems.map((invoiceItem) => (
+                          <CreateInvoiceSidePanelInvoiceItemList
+                            key={`sneak-peak-create-invoice-item-${invoiceItem?.item?.id}`}
+                            invoiceItem={{
+                              item: invoiceItem?.item,
+                              price: invoiceItem?.price,
+                              quantity: invoiceItem?.quantity
+                            }}
+                          />
+                        ))}
+                  </span>
+                </>
+              ) : null}
+              {selectedTax
+                ? (() => {
+                    const { cgst, grossTotal, netTotal, sgst } = getInvoiceTotals({
+                      invoiceItems: invoiceItems,
+                      tax: selectedTax
+                    })
+                    return (
+                      <>
+                        <Separator />
+                        <span className="p-4 w-full">
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">Gross</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(grossTotal)}</p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">CGST({selectedTax.cgst}%)</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst)}</p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">SGST({selectedTax.sgst}%)</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(sgst)}</p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">Total</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(netTotal)}</p>
+                          </div>
+                        </span>
+                      </>
+                    )
+                  })()
+                : null}
+            </div>
+          )}
+        </ScrollArea>
+        <div>
+          <H4 className="flex items-center gap-1">
+            PDF live feed <Zap className="w-4 h-4 text-yellow-500" />
+          </H4>
+          <p className="text-xs text-muted-foreground">Highlighted places will be filled with the info on this page</p>
+        </div>
+        <Tooltip delayDuration={800}>
+          <TooltipTrigger asChild>
+            <div
+              onClick={() => setIsExpandedDialogOpen(true)}
+              ref={containerRef}
+              className="h-max w-full rounded overflow-x-hidden overflow-y-scroll dark:opacity-90 cursor-pointer"
+            >
+              {pdfBase64?.length ? (
+                <PdfViewer
+                  uniqueIdentityForPageKey="create-invoice-pdf-page"
+                  className="border border-dashed overflow-y-scroll rounded-lg min-h-[20rem]"
+                  key={panelWidth + 'create-invoice-side-info-panel'}
+                  pdfBase64={pdfBase64}
+                  pageWidth={pdfContainerWidth}
                 />
-              )
-            })}
-          </Document>
-        ) : null}
+              ) : null}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="center">
+            <P className="flex items-center gap-2">
+              Click to expand <MousePointerClick className="w-4 h-4" />
+            </P>
+          </TooltipContent>
+        </Tooltip>
       </div>
-    </div>
+      <Dialog open={isExpandedDialogOpen} onOpenChange={setIsExpandedDialogOpen}>
+        <DialogPortal>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>PDF Expanded</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <div ref={pdfExpandedDialogRef} className="w-full h-max border border-dashed rounded-lg overflow-hidden bg-white dark:opacity-90">
+                {pdfBase64?.length ? (
+                  <PdfViewer
+                    uniqueIdentityForPageKey="create-invoice-pdf-page"
+                    className="overflow-y-scroll min-h-[calc(100svh-20rem)] min-w-[20rem]"
+                    key={pdfExpandedDialogRef?.current?.offsetWidth + 'create-invoice-side-info-panel'}
+                    pdfBase64={pdfBase64}
+                    pageWidth={460}
+                  />
+                ) : null}
+              </div>
+            </DialogBody>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+    </>
   )
 }

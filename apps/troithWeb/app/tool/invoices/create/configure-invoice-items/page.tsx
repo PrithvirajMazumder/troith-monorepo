@@ -1,5 +1,5 @@
 'use client'
-import { Button, H3 } from '@troith/shared'
+import { Button } from '@troith/shared'
 import { InvoiceItem } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'
@@ -10,13 +10,21 @@ import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/co
 import { useRouter } from 'next-nprogress-bar'
 
 export default function ConfigureInvoiceItems() {
-  const { selectedItems, setInvoiceItems: setSelectedInvoiceItems } = useCreateInvoice()
+  const { selectedItems, setInvoiceItems: setSelectedInvoiceItems, invoiceItems: previouslyInvoiceItems } = useCreateInvoice()
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
-    selectedItems.map((selectedItem) => ({
-      item: selectedItem,
-      price: 0,
-      quantity: 0
-    }))
+    (() => {
+      const isExistingInvoiceItem = previouslyInvoiceItems.some(
+        (previouslyInvoiceItem) => !!selectedItems?.find((selectedItem) => selectedItem.id !== previouslyInvoiceItem?.item?.id)
+      )
+      if (!previouslyInvoiceItems?.length || isExistingInvoiceItem) {
+        return selectedItems.map((selectedItem) => ({
+          item: selectedItem,
+          price: 0,
+          quantity: 0
+        }))
+      }
+      return previouslyInvoiceItems
+    })()
   )
   const router = useRouter()
 
