@@ -10,6 +10,8 @@ import { ChevronRight } from 'lucide-react'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next-nprogress-bar'
+import { motion } from 'framer-motion'
+import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 
 type ItemsMap = { [key: string]: Item }
 
@@ -59,13 +61,13 @@ export default function SelectItemsCreateInvoicePage() {
           </AccordionItem>
         </Accordion>
       ) : null}
-      <div className="flex flex-col gap-3 mt-4">
+      <motion.div {...animateBasicMotionOpacity()} className="flex flex-col gap-3 mt-4">
         {itemsData?.items
           ?.filter((item) => !selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
           ?.map((item) => (
             <ItemCard isSelected={!!selectedItemsMap[item.id]} item={item as Item} key={item?.id} onSelect={handleItemSelection} />
           ))}
-      </div>
+      </motion.div>
       <Button
         disabled={!selectedItems?.length}
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}

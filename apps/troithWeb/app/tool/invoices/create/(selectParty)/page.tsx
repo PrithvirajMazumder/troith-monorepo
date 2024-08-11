@@ -7,6 +7,8 @@ import { Party } from '@troithWeb/__generated__/graphql'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 import { useRouter } from 'next-nprogress-bar'
+import { AnimatePresence, motion } from 'framer-motion'
+import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 
 export default function SelectPartyCreateInvoicePage() {
   const router = useRouter()
@@ -27,19 +29,21 @@ export default function SelectPartyCreateInvoicePage() {
   }
 
   return (
-    <>
+    <AnimatePresence>
       <CreateInvoicePagesHeader
         title="Select Party"
         subtitle="Please select a party for whom you would like to create this invoice from the available options."
       />
-      {partiesData?.parties?.map((party) => (
-        <PartyCard
-          isSelected={party.id === selectedParty?.id}
-          onSelect={handlePartySelection}
-          key={`party-card-create-invoice-${party?.id}`}
-          party={party as Party}
-        />
-      ))}
-    </>
+      <motion.div {...animateBasicMotionOpacity()} className="w-full flex flex-col gap-3 h-full">
+        {partiesData?.parties?.map((party) => (
+          <PartyCard
+            isSelected={party.id === selectedParty?.id}
+            onSelect={handlePartySelection}
+            key={`party-card-create-invoice-${party?.id}`}
+            party={party as Party}
+          />
+        ))}
+      </motion.div>
+    </AnimatePresence>
   )
 }

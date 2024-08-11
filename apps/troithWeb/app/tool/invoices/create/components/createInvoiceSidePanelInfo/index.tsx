@@ -1,5 +1,5 @@
 'use client'
-import { Invoice } from '@troithWeb/__generated__/graphql'
+import { Invoice, Party } from '@troithWeb/__generated__/graphql'
 import { useEffect, useRef, useState } from 'react'
 import { getBaseInvoicePdf } from '@troithWeb/app/tool/invoices/create/utils/generateHalfPdf'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
@@ -23,6 +23,9 @@ import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoi
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
+import { usePathname } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
+import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 
 type Props = {
   panelWidth: number
@@ -33,6 +36,7 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
   const [pdfBase64, setPdfBase64] = useState<string>('')
   const [pdfContainerWidth, setPdfContainerWidth] = useState(0)
   const [isExpandedDialogOpen, setIsExpandedDialogOpen] = useState(false)
+  const pathname = usePathname()
   const containerRef = useRef<HTMLDivElement>(null)
   const pdfExpandedDialogRef = useRef<HTMLDivElement>(null)
 
@@ -48,7 +52,8 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
         id: '658db32a6cf334fc362c9cad'
       }
     } as Pick<Invoice, 'company'>)
-    if (invoiceItems?.length && selectedParty) {
+
+    if (pathname.includes('finalize-invoice') && invoiceItems?.length && selectedParty) {
       basePdf
         .putFinalInvoiceInfo({
           bank: selectedBank,
@@ -68,14 +73,16 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
         })
       return
     }
-    if (!invoiceItems?.length && selectedItems?.length && selectedParty) {
+    if (pathname.includes('configure-invoice-items') && selectedItems?.length && selectedParty) {
       basePdf
         .putInvoiceItems({
-          invoiceItems: selectedItems?.map((item) => ({
-            item,
-            price: 0,
-            quantity: 0
-          }))
+          invoiceItems: invoiceItems?.length
+            ? invoiceItems
+            : selectedItems?.map((item) => ({
+                item,
+                price: 0,
+                quantity: 0
+              }))
         })
         .highlightInvoiceItems()
         .putPartyData({ party: selectedParty })
@@ -85,106 +92,119 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
         })
       return
     }
-    if (selectedParty) {
+    if (pathname.includes('choose-items') && selectedParty) {
       basePdf
-        .highlightInvoiceItems()
         .putPartyData({ party: selectedParty })
+        .putInvoiceItems({
+          invoiceItems: selectedItems?.length
+            ? selectedItems.map((item) => ({
+                item,
+                price: 0,
+                quantity: 0
+              }))
+            : []
+        })
+        .highlightInvoiceItems()
         .generate()
         .getBase64((pdfBase64) => {
           setPdfBase64(pdfBase64)
         })
       return
     }
-
-    basePdf
-      .highlightParty()
-      .generate()
-      .getBase64((pdfBase64) => {
-        setPdfBase64(pdfBase64)
-      })
-  }, [selectedParty, selectedItems, invoiceItems, selectedBank, selectedDate, selectedTax, selectedInvoiceNumber])
+    if (pathname.endsWith('create')) {
+      basePdf
+        .highlightParty()
+        .putPartyData({ party: selectedParty as Party })
+        .generate()
+        .getBase64((pdfBase64) => {
+          setPdfBase64(pdfBase64)
+        })
+    }
+  }, [pathname])
 
   useEffect(() => {
     setPdfContainerWidth(containerRef?.current?.clientWidth ?? 0)
   }, [panelWidth])
 
   return (
-    <>
-      <div className="h-[calc(100svh-117px)] pb-4 flex flex-col gap-4 px-4">
+    <AnimatePresence>
+      <motion.div {...animateBasicMotionOpacity()} className="h-[calc(100svh-117px)] pb-4 flex flex-col gap-4 px-4">
         <ScrollArea className="border-b flex-1">
           <H4>Progress</H4>
           <p className="text-xs text-muted-foreground mb-4">
             Here you can see the live update of all the selected info for creating this new invoice.
           </p>
-          {selectedParty && (
-            <div className="flex border rounded-lg flex-col bg-background items-start border-dashed">
-              <span className="p-4">
-                <p className="text-[12px] underline decoration-dashed text-muted-foreground">Party</p>
-                <p className="text-lg font-semibold">{selectedParty?.name}</p>
-                <p className="text-sm text-muted-foreground italic">GSTIN: {selectedParty?.gstin}</p>
-              </span>
-              {selectedItems?.length ? (
-                <>
-                  <Separator />
-                  <span className="p-4 w-full">
-                    <p className="text-[12px] underline decoration-dashed text-muted-foreground">Items</p>
-                    {!invoiceItems?.length
-                      ? selectedItems.map((item) => (
-                          <CreateInvoiceSidePanelInvoiceItemList
-                            key={`sneak-peak-create-invoice-item-${item.id}`}
-                            invoiceItem={{
-                              item,
-                              price: 0,
-                              quantity: 0
-                            }}
-                          />
-                        ))
-                      : invoiceItems.map((invoiceItem) => (
-                          <CreateInvoiceSidePanelInvoiceItemList
-                            key={`sneak-peak-create-invoice-item-${invoiceItem?.item?.id}`}
-                            invoiceItem={{
-                              item: invoiceItem?.item,
-                              price: invoiceItem?.price,
-                              quantity: invoiceItem?.quantity
-                            }}
-                          />
-                        ))}
-                  </span>
-                </>
-              ) : null}
-              {selectedTax
-                ? (() => {
-                    const { cgst, grossTotal, netTotal, sgst } = getInvoiceTotals({
-                      invoiceItems: invoiceItems,
-                      tax: selectedTax
-                    })
-                    return (
-                      <>
-                        <Separator />
-                        <span className="p-4 w-full">
-                          <div className="flex justify-between">
-                            <p className="text-sm text-muted-foreground">Gross</p>
-                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(grossTotal)}</p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="text-sm text-muted-foreground">CGST({selectedTax.cgst}%)</p>
-                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst)}</p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="text-sm text-muted-foreground">SGST({selectedTax.sgst}%)</p>
-                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(sgst)}</p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="text-sm text-muted-foreground">Total</p>
-                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(netTotal)}</p>
-                          </div>
-                        </span>
-                      </>
-                    )
-                  })()
-                : null}
-            </div>
-          )}
+          <AnimatePresence>
+            {selectedParty && (
+              <motion.div {...animateBasicMotionOpacity()} className="flex border rounded-lg flex-col bg-background items-start border-dashed">
+                <span className="p-4">
+                  <p className="text-[12px] underline decoration-dashed text-muted-foreground">Party</p>
+                  <p className="text-lg font-semibold">{selectedParty?.name}</p>
+                  <p className="text-sm text-muted-foreground italic">GSTIN: {selectedParty?.gstin}</p>
+                </span>
+                {selectedItems?.length ? (
+                  <>
+                    <Separator />
+                    <motion.span {...animateBasicMotionOpacity()} className="p-4 w-full overflow-hidden duration-300">
+                      <p className="text-[12px] underline decoration-dashed text-muted-foreground">Items</p>
+                      {!invoiceItems?.length
+                        ? selectedItems.map((item) => (
+                            <CreateInvoiceSidePanelInvoiceItemList
+                              key={`sneak-peak-create-invoice-item-${item.id}`}
+                              invoiceItem={{
+                                item,
+                                price: 0,
+                                quantity: 0
+                              }}
+                            />
+                          ))
+                        : invoiceItems.map((invoiceItem) => (
+                            <CreateInvoiceSidePanelInvoiceItemList
+                              key={`sneak-peak-create-invoice-item-${invoiceItem?.item?.id}`}
+                              invoiceItem={{
+                                item: invoiceItem?.item,
+                                price: invoiceItem?.price,
+                                quantity: invoiceItem?.quantity
+                              }}
+                            />
+                          ))}
+                    </motion.span>
+                  </>
+                ) : null}
+                {selectedTax
+                  ? (() => {
+                      const { cgst, grossTotal, netTotal, sgst } = getInvoiceTotals({
+                        invoiceItems: invoiceItems,
+                        tax: selectedTax
+                      })
+                      return (
+                        <>
+                          <Separator />
+                          <motion.span {...animateBasicMotionOpacity()} className="p-4 w-full">
+                            <div className="flex justify-between">
+                              <p className="text-sm text-muted-foreground">Gross</p>
+                              <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(grossTotal)}</p>
+                            </div>
+                            <div className="flex justify-between">
+                              <p className="text-sm text-muted-foreground">CGST({selectedTax.cgst}%)</p>
+                              <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst)}</p>
+                            </div>
+                            <div className="flex justify-between">
+                              <p className="text-sm text-muted-foreground">SGST({selectedTax.sgst}%)</p>
+                              <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(sgst)}</p>
+                            </div>
+                            <div className="flex justify-between">
+                              <p className="text-sm text-muted-foreground">Total</p>
+                              <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(netTotal)}</p>
+                            </div>
+                          </motion.span>
+                        </>
+                      )
+                    })()
+                  : null}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ScrollArea>
         <div>
           <H4 className="flex items-center gap-1">
@@ -216,7 +236,7 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
             </P>
           </TooltipContent>
         </Tooltip>
-      </div>
+      </motion.div>
       <Dialog open={isExpandedDialogOpen} onOpenChange={setIsExpandedDialogOpen}>
         <DialogPortal>
           <DialogContent>
@@ -239,6 +259,6 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
           </DialogContent>
         </DialogPortal>
       </Dialog>
-    </>
+    </AnimatePresence>
   )
 }

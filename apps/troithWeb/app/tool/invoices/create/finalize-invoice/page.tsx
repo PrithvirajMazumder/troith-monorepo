@@ -39,14 +39,17 @@ import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/cre
 import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
 import { useToast } from '@troith/shared/hooks/use-toast'
 import { useRouter } from 'next-nprogress-bar'
+import { usePathname } from 'next/navigation'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
+  const pathname = usePathname()
   const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate, setSelectedInvoiceNumber } =
     useCreateInvoice()
   const router = useRouter()
   const { toast } = useToast()
-  const { createInvoice, isInvoiceCreating } = useFinalizeInvoice()
+  const { createInvoice } = useFinalizeInvoice()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
   const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
@@ -92,6 +95,10 @@ export default function AddMisc() {
     }
   }, [debouncedInvoiceNumber])
 
+  useEffect(() => {
+    setIsSubmitting(false)
+  }, [pathname])
+
   const validateInvoiceNumber = (invoiceNumberData: GetInvoiceNumberWithNoQuery | null | undefined): boolean => {
     if (invoiceNumberData) {
       setError('invoiceNumber', {
@@ -120,6 +127,7 @@ export default function AddMisc() {
           const selectedTax = taxationData?.taxes?.find((tax) => tax.id === data.taxation)
           if (selectedBank && selectedTax) {
             try {
+              setIsSubmitting(true)
               const { data: newInvoiceData } = await createInvoice({
                 variables: {
                   companyId: '658db32a6cf334fc362c9cad',
@@ -150,6 +158,7 @@ export default function AddMisc() {
                 title: 'Uh oh! Something went wrong!',
                 description: 'Seems like this invoice can be created right now.'
               })
+              setIsSubmitting(false)
             }
           }
         })}
@@ -335,11 +344,11 @@ export default function AddMisc() {
             <DialogDescription>Are you sure you want to create this invoice?</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button disabled={isInvoiceCreating} variant="ghost" onClick={() => setIsConfirmationPopupOpen(false)}>
+            <Button disabled={isSubmitting} variant="ghost" onClick={() => setIsConfirmationPopupOpen(false)}>
               No
             </Button>
-            <Button form={FINALIZE_INVOICE_FORM_ID} disabled={isInvoiceCreating}>
-              {isInvoiceCreating && <Loader className="mr-2 animate-spin w-4 h-4" />}
+            <Button form={FINALIZE_INVOICE_FORM_ID} disabled={isSubmitting}>
+              {isSubmitting && <Loader className="mr-2 animate-spin w-4 h-4" />}
               Yes
             </Button>
           </DialogFooter>

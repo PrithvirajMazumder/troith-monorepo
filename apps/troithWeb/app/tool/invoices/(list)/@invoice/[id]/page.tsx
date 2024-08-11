@@ -9,6 +9,8 @@ import { Invoice as InvoiceType } from '@troithWeb/__generated__/graphql'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { useEffect, useState } from 'react'
 import { generateCompleteInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateCompleteInvoice'
+import { AnimatePresence, motion } from 'framer-motion'
+import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
   const [totalPages, setTotalPages] = useState<number>(0)
@@ -27,8 +29,8 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
   }, [invoiceData])
 
   return (
-    <>
-      <header className="border-b px-4 py-4 h-16 flex items-center">
+    <AnimatePresence>
+      <motion.header {...animateBasicMotionOpacity()} className="border-b px-4 py-4 h-16 flex items-center">
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -87,7 +89,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
             </TooltipContent>
           </Tooltip>
         </div>
-      </header>
+      </motion.header>
       <ScrollArea className="h-full p-6">
         <H3>Invoice: {invoiceId}</H3>
         {pdfBase64?.length ? (
@@ -111,6 +113,6 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
           </Document>
         ) : null}
       </ScrollArea>
-    </>
+    </AnimatePresence>
   )
 }

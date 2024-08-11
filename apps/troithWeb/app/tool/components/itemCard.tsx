@@ -1,6 +1,6 @@
 import { Item } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
-import { Avatar, AvatarFallback, Badge, H4, Separator } from '@troith/shared'
+import { Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
 import React from 'react'
 
@@ -8,6 +8,20 @@ export type Props = {
   item: Item
   onSelect: (item: Item) => void
   isSelected?: boolean
+}
+
+export const ItemCardSkeletonLoader = () => {
+  return (
+    <div className="p-3 w-full border rounded-lg">
+      <div className="animate-pulse space-y-4">
+        <div className="h-6 bg-gray-200 rounded w-1/4" />
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="h-4 bg-gray-200 rounded w-1/3" />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export const ItemCard = ({ onSelect, isSelected = false, item }: Props) => {

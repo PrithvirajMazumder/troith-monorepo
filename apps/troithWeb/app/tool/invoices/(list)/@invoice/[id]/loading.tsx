@@ -1,3 +1,3 @@
-import InvoicesProgress from '@troithWeb/app/tool/invoices/(list)/loading'
+import InvoiceIdProgress from '@troithWeb/app/tool/invoices/(list)/@invoice/loading'
 
-export default InvoicesProgress
+export default InvoiceIdProgress

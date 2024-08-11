@@ -6,6 +6,8 @@ import { Plus } from 'lucide-react'
 import { buttonVariants } from '@troith/shared'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
+import { AnimatePresence, motion } from 'framer-motion'
+import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 
 export default function Invoices() {
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.allByCompanyId, {
@@ -14,7 +16,7 @@ export default function Invoices() {
   })
 
   return (
-    <>
+    <AnimatePresence>
       <Link
         href="/tool/invoices/create"
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-20 right-4', buttonVariants({ variant: 'default' }))}
@@ -22,11 +24,11 @@ export default function Invoices() {
         <Plus className="h-4 w-4 mr-2" />
         Create invoice
       </Link>
-      <div className="flex flex-col w-full gap-4 pb-24">
+      <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
         {invoiceData?.invoices?.map((invoice) => (
           <InvoiceCard invoice={invoice} key={`invoice-list-${invoice?.id}`} />
         ))}
-      </div>
-    </>
+      </motion.div>
+    </AnimatePresence>
   )
 }

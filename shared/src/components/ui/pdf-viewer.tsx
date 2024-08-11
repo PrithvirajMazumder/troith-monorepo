@@ -13,8 +13,9 @@ export type PdfViewerProps = {
 export const PdfViewer = ({
   pdfBase64,
   loader = (
-    <div className="flex justify-center">
-      <Loader className="w-4 h-4 animate-spin" />
+    <div className="flex flex-col h-full items-center justify-center pt-10 gap-2">
+      <Loader className="w-5 h-5 min-w-5 min-h-5 animate-spin" />
+      <p className="text-muted-foreground text-xs">PDF Loading...</p>
     </div>
   ),
   ...otherProps

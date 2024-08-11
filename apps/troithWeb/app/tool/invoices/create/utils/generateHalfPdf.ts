@@ -19,22 +19,23 @@ const generate = (pdf: TDocumentDefinitions) => {
 
 const putPartyData = ({ party }: Pick<Invoice, 'party'>, pdf: TDocumentDefinitions) => {
   const newPdf = { ...pdf }
-  // @ts-expect-error while copying content becomes un-iterable
-  newPdf.content[0].table.body[0][2] = {
-    stack: [
-      'To,',
-      capitalize(party?.name ?? ''),
-      capitalize([party?.addressLine1, party?.addressLine2, party?.city].filter((addressPart) => addressPart?.length).join(', ')),
-      {
-        text: capitalize(`${party?.state}: ${party?.zipCode}`),
-        style: { marginBottom: 10 }
-      },
-      `Vehicle No: `
-    ],
-    rowSpan: 3,
-    colSpan: 2
+  if (party) {
+    // @ts-expect-error while copying content becomes un-iterable
+    newPdf.content[0].table.body[0][2] = {
+      stack: [
+        'To,',
+        capitalize(party?.name ?? ''),
+        capitalize([party?.addressLine1, party?.addressLine2, party?.city].filter((addressPart) => addressPart?.length).join(', ')),
+        {
+          text: capitalize(`${party?.state}: ${party?.zipCode}`),
+          style: { marginBottom: 10 }
+        },
+        `Vehicle No: `
+      ],
+      rowSpan: 3,
+      colSpan: 2
+    }
   }
-
   return {
     generate: () => generate(newPdf),
     putInvoiceItems: (invoiceItems: Pick<Invoice, 'invoiceItems'>) => putInvoiceItems(invoiceItems, pdf),
@@ -57,37 +58,39 @@ const putInvoiceItems = ({ invoiceItems }: Pick<Invoice, 'invoiceItems'>, pdf: T
   ])
 
   const newPdf = { ...pdf }
-  // @ts-expect-error while copying content becomes un-iterable
-  newPdf.content[1] = {
-    table: {
-      widths: ['auto', '*', 'auto', 'auto', 'auto'],
-      body: [
-        [
-          { text: 'SL', style: { bold: true, italics: true } },
-          { text: 'Name', style: { bold: true, italics: true } },
-          { text: 'HSN', style: { bold: true, italics: true } },
-          { text: 'Quantity', style: { bold: true, italics: true } },
-          {
-            text: 'Price',
-            alignment: 'right',
-            bold: true,
-            italics: true
+  if (items?.length) {
+    // @ts-expect-error while copying content becomes un-iterable
+    newPdf.content[1] = {
+      table: {
+        widths: ['auto', '*', 'auto', 'auto', 'auto'],
+        body: [
+          [
+            { text: 'SL', style: { bold: true, italics: true } },
+            { text: 'Name', style: { bold: true, italics: true } },
+            { text: 'HSN', style: { bold: true, italics: true } },
+            { text: 'Quantity', style: { bold: true, italics: true } },
+            {
+              text: 'Price',
+              alignment: 'right',
+              bold: true,
+              italics: true
+            }
+          ],
+          ...items
+        ]
+      },
+      layout: {
+        fillColor: function (rowIndex: number) {
+          if (rowIndex === 0) {
+            return '#dbdbdb'
           }
-        ],
-        ...items
-      ]
-    },
-    layout: {
-      fillColor: function (rowIndex: number) {
-        if (rowIndex === 0) {
-          return '#dbdbdb'
+          return rowIndex % 2 === 0 ? '#f4f4f4' : null
         }
-        return rowIndex % 2 === 0 ? '#f4f4f4' : null
       }
     }
+    // @ts-expect-error while copying content becomes un-iterable
+    newPdf.content[2].table.body[0][3].text = convertAmountToInr(getGrossTotalValueFromInvoiceItems(invoiceItems), false)
   }
-  // @ts-expect-error while copying content becomes un-iterable
-  newPdf.content[2].table.body[0][3].text = convertAmountToInr(getGrossTotalValueFromInvoiceItems(invoiceItems), false)
   return {
     generate: () => generate(newPdf),
     putPartyData: (party: Pick<Invoice, 'party'>) => putPartyData(party, newPdf),
