@@ -78,16 +78,6 @@ export default function CreateInvoiceLayout({ children }: PropsWithChildren) {
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                {pathname === '/tool/invoices/create/preview' ? (
-                  <BreadcrumbPage>Preview</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link href="/tool/invoices/create/preview">Preview</Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </motion.header>
