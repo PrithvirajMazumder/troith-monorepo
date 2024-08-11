@@ -120,7 +120,7 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
           setPdfBase64(pdfBase64)
         })
     }
-  }, [pathname])
+  }, [pathname, selectedBank, selectedDate, selectedTax])
 
   useEffect(() => {
     setPdfContainerWidth(containerRef?.current?.clientWidth ?? 0)

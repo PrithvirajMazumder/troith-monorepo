@@ -100,7 +100,7 @@ export default function AddMisc() {
   }, [pathname])
 
   const validateInvoiceNumber = (invoiceNumberData: GetInvoiceNumberWithNoQuery | null | undefined): boolean => {
-    if (invoiceNumberData) {
+    if (invoiceNumberData?.invoiceByNo) {
       setError('invoiceNumber', {
         message: 'This invoice number cannot be used, an invoice is already present with this number'
       })

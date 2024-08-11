@@ -14,6 +14,7 @@ import {
 import { CheckCircle, Gem, PencilLine, PlusCircle } from 'lucide-react'
 import { ResizableTwoColumnToolLayout } from '@troithWeb/app/tool/components/layouts/resizableTwoColumnToolLayout'
 import { InvoiceStatuses } from '@troithWeb/app/constants/invoiceStatuses'
+import { cn } from '@troith/shared/lib/util'
 
 type Props = {
   children: ReactNode
@@ -52,6 +53,7 @@ export default function InvoicesLayout(props: Props) {
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{props.children}</ScrollArea>
         </>
       }
+      secondColClassName={cn('bg-gray-50 dark:bg-zinc-900/20')}
       secondCol={props.invoice}
     />
   )

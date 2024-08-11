@@ -30,7 +30,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
 
   return (
     <AnimatePresence>
-      <motion.header {...animateBasicMotionOpacity()} className="border-b px-4 py-4 h-16 flex items-center">
+      <motion.header {...animateBasicMotionOpacity()} className="border-b bg-background px-4 py-4 h-16 flex items-center">
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
