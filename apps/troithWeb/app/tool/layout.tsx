@@ -16,13 +16,18 @@ import { PropsWithChildren, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
 import { ApolloWrapper } from '../../lib/graphqlClient'
+import { ToolCommandBar } from '@troithWeb/app/components/toolCommandBar'
+import { useToolCommand } from '@troithWeb/app/components/toolCommandBar/hooks/useToolCommand'
 
 const ToolLayout = ({ children }: PropsWithChildren) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { shouldOpen, setShouldOpen } = useToolCommand()
   const { setTheme } = useTheme()
   const pathname = usePathname()
+
   return (
     <ApolloWrapper>
+      <ToolCommandBar shouldOpen={shouldOpen} onOpenChange={setShouldOpen} />
       <TooltipProvider>
         <ResizablePanelGroup autoSaveId="TOOL_ROOT_LAYOUT_REZIABLE_PANEL" direction="horizontal" className="!h-screen border-r">
           <ResizablePanel
