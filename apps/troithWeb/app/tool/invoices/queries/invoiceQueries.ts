@@ -23,6 +23,7 @@ export const InvoiceQueries = {
           invoice(id: $invoiceId) {
               id
               date
+              shouldUseIgst
               invoiceItems {
                   quantity
                   item {

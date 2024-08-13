@@ -14,7 +14,7 @@ import {
 import { CheckCircle, Gem, PencilLine, PlusCircle } from 'lucide-react'
 import { ResizableTwoColumnToolLayout } from '@troithWeb/app/tool/components/layouts/resizableTwoColumnToolLayout'
 import { InvoiceStatuses } from '@troithWeb/app/constants/invoiceStatuses'
-import { cn } from '@troith/shared/lib/util'
+import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 
 type Props = {
   children: ReactNode
@@ -24,6 +24,7 @@ type Props = {
 export default function InvoicesLayout(props: Props) {
   return (
     <ResizableTwoColumnToolLayout
+      autoSaveId="INVOICE_RESIZABLE_LAYOUT_KEY"
       firstCol={
         <>
           <header className="border-b px-4 h-16 flex items-center gap-2">
@@ -53,7 +54,15 @@ export default function InvoicesLayout(props: Props) {
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{props.children}</ScrollArea>
         </>
       }
-      secondColClassName={cn('bg-gray-50 dark:bg-zinc-900/20')}
+      onResize={(size) => {
+        window.dispatchEvent(
+          new CustomEvent(CustomEventsNames.InvoiceSidePanelResizeEventName, {
+            detail: {
+              message: size
+            }
+          })
+        )
+      }}
       secondCol={props.invoice}
     />
   )

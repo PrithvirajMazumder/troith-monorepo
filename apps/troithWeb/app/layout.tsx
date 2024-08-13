@@ -18,7 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <div className="container mx-auto">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
-            <ProgressBar height="5px" color="#000000" options={{ showSpinner: false }} />
+            <ProgressBar height="3px" color="#000000" options={{ showSpinner: false }} />
           </ThemeProvider>
           <Toaster />
         </div>

@@ -52,7 +52,9 @@ export default function AddMisc() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
-  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
+  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber, {
+    fetchPolicy: 'network-only'
+  })
   const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isInvoiceNumberPresentLoading }] = useLazyQuery(
     InvoiceQueries.getInvoiceNumberWithNo
   )
