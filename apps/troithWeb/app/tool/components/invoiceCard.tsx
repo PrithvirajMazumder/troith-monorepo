@@ -46,8 +46,18 @@ export const InvoiceCard = ({ invoice }: Props) => {
       href={`/tool/invoices/${invoice.id}`}
       className={cn(
         'flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all w-full',
-        `bg-${getInvoiceStatusColor(invoice.status)}-500/5 dark:bg-${getInvoiceStatusColor(invoice.status)}-800/5`,
-        `hover:bg-${getInvoiceStatusColor(invoice.status)}-500/10 dark:hover:bg-${getInvoiceStatusColor(invoice.status)}-800/10`
+        {
+          'bg-blue-500/5 dark:border-blue-500/30 dark:bg-blue-800/10 dark:hover:bg-blue-800/20 hover:bg-blue-500/10':
+            invoice.status === InvoiceStatus.Confirmed
+        },
+        {
+          'bg-zinc-500/5 dark:border-zinc-500/30 dark:bg-zinc-800/10 dark:hover:bg-zinc-800/20 hover:bg-zinc-500/10':
+            invoice.status === InvoiceStatus.Draft
+        },
+        {
+          'bg-green-500/5 dark:border-green-500/30 dark:bg-green-800/10 dark:hover:bg-green-800/20 hover:bg-green-500/10':
+            invoice.status === InvoiceStatus.Paid
+        }
       )}
     >
       <div className="flex w-full flex-col gap-1">

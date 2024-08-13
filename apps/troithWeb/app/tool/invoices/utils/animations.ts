@@ -1,4 +1,4 @@
-export const animateBasicMotionOpacity = () => {
+export const animateBasicMotionOpacity = (animateOpacity = 1) => {
   return {
     initial: {
       opacity: 0
@@ -7,7 +7,7 @@ export const animateBasicMotionOpacity = () => {
       opacity: 0
     },
     animate: {
-      opacity: 1
+      opacity: animateOpacity
     }
   }
 }

@@ -80,5 +80,19 @@ export const InvoiceMutations = {
     status
     no
   }
+}`),
+  updateInvoiceStatus: gql(`mutation UpdateInvoiceStatus(
+  $id: String!
+  $status: InvoiceStatus!
+) {
+  updateInvoice(
+    updateInvoiceInput: {
+      id: $id
+      status: $status
+    }
+  ) {
+    id
+    status
+  }
 }`)
 } as const
