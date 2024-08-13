@@ -131,9 +131,12 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
                 onClick={() => toggleSelectCompanyModal(true)}
               >
                 <div
-                  className={cn('w-5 h-5 min-w-5 min-h-5 bg-foreground rounded-full flex flex-col justify-center items-center text-foreground', {
-                    'mr-2': !isCollapsed
-                  })}
+                  className={cn(
+                    'w-5 h-5 min-w-5 min-h-5 bg-foreground/60 rounded-full flex flex-col justify-center items-center text-white dark:text-black text-[10px]',
+                    {
+                      'mr-2': !isCollapsed
+                    }
+                  )}
                 >
                   {selectedCompany?.legalName?.substring(0, 2)?.toUpperCase()}
                 </div>
