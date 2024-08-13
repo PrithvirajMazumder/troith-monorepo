@@ -8,10 +8,12 @@ import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 
 export default function Invoices() {
+  const { selectedCompany } = useCompanyStore()
   const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.allByCompanyId, {
-    variables: { companyId: '658db32a6cf334fc362c9cad' },
+    variables: { companyId: selectedCompany?.id ?? '' },
     fetchPolicy: 'network-only'
   })
 

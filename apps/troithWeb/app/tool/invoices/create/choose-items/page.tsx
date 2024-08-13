@@ -12,16 +12,18 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next-nprogress-bar'
 import { motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 
 type ItemsMap = { [key: string]: Item }
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'
+  const { selectedCompany } = useCompanyStore()
   const { selectedItems: previouslySelectedItems, selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
   const [selectedItems, setSelectedItems] = useState<Item[]>(previouslySelectedItems)
   const [selectedItemsMap, setSelectedItemsMap] = useState<ItemsMap>({} as ItemsMap)
   const { data: itemsData } = useSuspenseQuery(ItemQueries.itemsByCompanyId, {
-    variables: { companyId: '658db32a6cf334fc362c9cad' }
+    variables: { companyId: selectedCompany?.id ?? '' }
   })
   const router = useRouter()
 
