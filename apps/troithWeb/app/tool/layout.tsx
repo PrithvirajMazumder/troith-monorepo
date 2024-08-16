@@ -16,7 +16,21 @@ import {
   TooltipTrigger
 } from '@troith/shared/components/ui'
 import { P } from '@troith/shared/components/typography'
-import { Factory, Home, Landmark, LogOut, Moon, NotebookText, Pyramid, ScrollText, Settings, SquarePercent, Sun, UsersRound } from 'lucide-react'
+import {
+  ChevronRight,
+  Factory,
+  Home,
+  Landmark,
+  LogOut,
+  Moon,
+  NotebookText,
+  Pyramid,
+  ScrollText,
+  Settings,
+  SquarePercent,
+  Sun,
+  UsersRound
+} from 'lucide-react'
 import { NavMenu } from './components/navMenu'
 import { PropsWithChildren, useState } from 'react'
 import { useTheme } from 'next-themes'
@@ -29,6 +43,7 @@ import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
 import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
 import { Company } from '@troithWeb/__generated__/graphql'
+import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 
 const ToolLayout = ({ children }: PropsWithChildren) => {
   const { selectedCompany, companies, setSelectedCompany, isSelectCompanyModalOpen, toggleSelectCompanyModal } = useCompanyStore()
@@ -51,9 +66,11 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
               <DialogTitle>Select a company</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              {companies?.map((company) => (
-                <CompanyCard company={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
-              ))}
+              <div className="w-full flex flex-col gap-2">
+                {companies?.map((company) => (
+                  <CompanyCard company={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
+                ))}
+              </div>
             </DialogBody>
           </DialogContent>
         </DialogPortal>
@@ -61,8 +78,35 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
       <ToolCommandBar shouldOpen={shouldOpen} onOpenChange={setShouldOpen} />
       <ResizablePanelGroup autoSaveId="TOOL_ROOT_LAYOUT_REZIABLE_PANEL" direction="horizontal" className="!h-screen border-r">
         <ResizablePanel
-          onCollapse={() => setIsCollapsed(true)}
-          onExpand={() => setIsCollapsed(false)}
+          onResize={(size) => {
+            window.dispatchEvent(
+              new CustomEvent(CustomEventsNames.ToolSideMenuResizeEventName, {
+                detail: {
+                  message: size
+                }
+              })
+            )
+          }}
+          onCollapse={() => {
+            setIsCollapsed(true)
+            window.dispatchEvent(
+              new CustomEvent(CustomEventsNames.ToolSideMenuResizeEventName, {
+                detail: {
+                  message: 'true'
+                }
+              })
+            )
+          }}
+          onExpand={() => {
+            setIsCollapsed(false)
+            window.dispatchEvent(
+              new CustomEvent(CustomEventsNames.ToolSideMenuResizeEventName, {
+                detail: {
+                  message: 'false'
+                }
+              })
+            )
+          }}
           collapsible
           maxSize={20}
           minSize={12}
@@ -141,6 +185,7 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
                   {selectedCompany?.legalName?.substring(0, 2)?.toUpperCase()}
                 </div>
                 {isCollapsed ? null : selectedCompany ? selectedCompany?.name : 'Select company'}
+                {!isCollapsed ? <ChevronRight className="w-4 h-4 ml-auto" /> : null}
               </Button>
               <NavMenu variant={pathname.includes('settings') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/settings" icon={Settings}>
                 Settings

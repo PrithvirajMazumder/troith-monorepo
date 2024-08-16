@@ -51,7 +51,7 @@ export const InvoiceCard = ({ invoice }: Props) => {
             invoice.status === InvoiceStatus.Confirmed
         },
         {
-          'bg-zinc-500/5 dark:border-zinc-500/30 dark:bg-zinc-800/10 dark:hover:bg-zinc-800/20 hover:bg-zinc-500/10':
+          'bg-orange-500/5 dark:border-orange-500/30 dark:bg-orange-800/10 dark:hover:bg-orange-800/20 hover:bg-orange-500/10':
             invoice.status === InvoiceStatus.Draft
         },
         {
@@ -82,7 +82,11 @@ export const InvoiceCard = ({ invoice }: Props) => {
       <div className="flex items-center gap-2">
         <Badge
           variant="outline"
-          className={cn(`bg-${getInvoiceStatusColor(invoice.status)}-100 dark:bg-${getInvoiceStatusColor(invoice.status)}-950`)}
+          className={cn(
+            { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.Paid },
+            { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.Draft },
+            { 'bg-blue-100/50 0 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.Confirmed }
+          )}
         >
           {invoice?.status}
         </Badge>

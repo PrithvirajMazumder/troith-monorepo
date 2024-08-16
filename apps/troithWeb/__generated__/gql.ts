@@ -15,6 +15,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 const documents = {
     "query GetBanks {\n    banks {\n      id\n      accountNumber\n      branch\n      name\n      ifsc\n      user {\n        id\n      }\n    }\n  }": types.GetBanksDocument,
     "query GetCompanies($userId: String!) {\n    companies(userId: $userId){\n      id\n      name\n      legalName\n      city\n      state\n      addressLine1\n      addressLine2\n      gstin\n      zipCode\n    }\n  }": types.GetCompaniesDocument,
+    "query GetIndianStates {\n    indianStates {\n      displayName\n      value\n    }\n  }": types.GetIndianStatesDocument,
     "query GetTaxes {\n    taxes {\n      id\n      sgst\n      cgst\n    }\n  }": types.GetTaxesDocument,
     "mutation CreateInvoice(\n  $date: String!\n  $invoiceItems: [CreateInvoiceItemInput!]!\n  $partyId: String!\n  $vehicleNumber: String!\n  $companyId: String!\n  $taxId: String!\n  $no: Int!\n  $bankId: String!\n) {\n  createInvoice(\n    createInvoiceInput: {\n      date: $date\n      invoiceItems: $invoiceItems\n      partyId: $partyId\n      vehicleNumber: $vehicleNumber\n      companyId: $companyId\n      taxId: $taxId\n      no: $no\n      bankId: $bankId\n    }\n  ) {\n    id\n    date\n    invoiceItems {\n      quantity\n      item {\n        id\n        name\n        hsn\n        tax {\n          id\n          cgst\n          sgst\n        }\n        uom {\n          id\n          abbreviation\n          name\n        }\n      }\n      price\n    }\n    party {\n      id\n      addressLine1\n      addressLine2\n      zipCode\n      name\n      state\n      gstin\n      city\n    }\n    vehicleNumber\n    company{\n      id\n      name\n      legalName\n      city\n      state\n      addressLine1\n      addressLine2\n      gstin\n    }\n    tax {\n      id\n      cgst\n      sgst\n    }\n    bank {\n      id\n      accountNumber\n      branch\n      name\n      ifsc\n    }\n    status\n    no\n  }\n}": types.CreateInvoiceDocument,
     "mutation UpdateInvoiceStatus(\n  $id: String!\n  $status: InvoiceStatus!\n) {\n  updateInvoice(\n    updateInvoiceInput: {\n      id: $id\n      status: $status\n    }\n  ) {\n    id\n    status\n  }\n}": types.UpdateInvoiceStatusDocument,
@@ -24,6 +25,7 @@ const documents = {
     "query GetInvoiceNumberWithNo ($no: String!) {\n    invoiceByNo(no: $no){\n      no\n    }\n  }": types.GetInvoiceNumberWithNoDocument,
     "query GetItems($companyId: String!) {\n  items(companyId: $companyId) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}": types.GetItemsDocument,
     "query ItemsByIds($ids: [String!]!) {\n  itemsByIds(items: { ids: $ids }) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}": types.ItemsByIdsDocument,
+    "mutation CreateParty(\n      $name: String!\n      $addressLine1: String!\n      $addressLine2: String!\n      $zipCode: Int!\n      $state: String!\n      $city: String!\n      $companyId: String!\n      $gstin: String!\n      $partyItemIds: [String!]!\n    ) {\n      createParty(createPartyInput: {\n        name: $name\n        addressLine1: $addressLine1\n        addressLine2: $addressLine2\n        zipCode: $zipCode\n        state: $state\n        city: $city\n        companyId: $companyId\n        gstin: $gstin\n        partyItemIds: $partyItemIds\n      }) {\n        id\n      }\n  }": types.CreatePartyDocument,
     "query GetParties($companyId: String!) {\n  parties(companyId: $companyId) {\n    id\n    name\n    gstin\n    state\n    partyItemIds\n    company {\n      legalName\n    }\n  }\n}": types.GetPartiesDocument,
 };
 
@@ -49,6 +51,10 @@ export function gql(source: "query GetBanks {\n    banks {\n      id\n      acco
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "query GetCompanies($userId: String!) {\n    companies(userId: $userId){\n      id\n      name\n      legalName\n      city\n      state\n      addressLine1\n      addressLine2\n      gstin\n      zipCode\n    }\n  }"): (typeof documents)["query GetCompanies($userId: String!) {\n    companies(userId: $userId){\n      id\n      name\n      legalName\n      city\n      state\n      addressLine1\n      addressLine2\n      gstin\n      zipCode\n    }\n  }"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "query GetIndianStates {\n    indianStates {\n      displayName\n      value\n    }\n  }"): (typeof documents)["query GetIndianStates {\n    indianStates {\n      displayName\n      value\n    }\n  }"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -85,6 +91,10 @@ export function gql(source: "query GetItems($companyId: String!) {\n  items(comp
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "query ItemsByIds($ids: [String!]!) {\n  itemsByIds(items: { ids: $ids }) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}"): (typeof documents)["query ItemsByIds($ids: [String!]!) {\n  itemsByIds(items: { ids: $ids }) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation CreateParty(\n      $name: String!\n      $addressLine1: String!\n      $addressLine2: String!\n      $zipCode: Int!\n      $state: String!\n      $city: String!\n      $companyId: String!\n      $gstin: String!\n      $partyItemIds: [String!]!\n    ) {\n      createParty(createPartyInput: {\n        name: $name\n        addressLine1: $addressLine1\n        addressLine2: $addressLine2\n        zipCode: $zipCode\n        state: $state\n        city: $city\n        companyId: $companyId\n        gstin: $gstin\n        partyItemIds: $partyItemIds\n      }) {\n        id\n      }\n  }"): (typeof documents)["mutation CreateParty(\n      $name: String!\n      $addressLine1: String!\n      $addressLine2: String!\n      $zipCode: Int!\n      $state: String!\n      $city: String!\n      $companyId: String!\n      $gstin: String!\n      $partyItemIds: [String!]!\n    ) {\n      createParty(createPartyInput: {\n        name: $name\n        addressLine1: $addressLine1\n        addressLine2: $addressLine2\n        zipCode: $zipCode\n        state: $state\n        city: $city\n        companyId: $companyId\n        gstin: $gstin\n        partyItemIds: $partyItemIds\n      }) {\n        id\n      }\n  }"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

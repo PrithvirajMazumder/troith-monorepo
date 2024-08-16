@@ -158,7 +158,7 @@ export default function AddMisc() {
               toast({
                 variant: 'destructive',
                 title: 'Uh oh! Something went wrong!',
-                description: 'Seems like this invoice can be created right now.'
+                description: "Seems like this invoice can't be created right now."
               })
               setIsSubmitting(false)
             }

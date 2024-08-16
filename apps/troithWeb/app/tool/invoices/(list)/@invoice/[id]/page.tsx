@@ -33,7 +33,6 @@ import { format } from 'date-fns'
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
-import { InvoiceStatuses } from '@troithWeb/app/constants/invoiceStatuses'
 import { InvoiceMutations } from '@troithWeb/app/tool/invoices/queries/invoiceMutations'
 
 export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
@@ -55,9 +54,11 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
     const handleResize = () => setPdfContainerWidth(pdfContainerRef?.current?.offsetWidth ?? 0)
     handleResize()
     window.addEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
+    window.addEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
 
     return () => {
       window.removeEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
+      window.removeEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
     }
   }, [])
 
@@ -78,7 +79,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
                       invoiceData?.invoice?.status === InvoiceStatus.Paid
                   },
                   {
-                    'bg-zinc-50 dark:bg-zinc-900 hover:dark:bg-zinc-900/50 hover:bg-zinc-50/90 border-zinc-600':
+                    'bg-orange-50 dark:bg-orange-900 hover:dark:bg-orange-900/50 hover:bg-orange-50/90 border-orange-600':
                       invoiceData?.invoice?.status === InvoiceStatus.Draft
                   },
                   {

@@ -14,11 +14,10 @@ export const PartyCardSkeletonLoader = () => {
     <div className="p-3 w-full bg-background border rounded-lg">
       <div className="animate-pulse flex space-x-4">
         <div className="rounded-full bg-gray-200 dark:bg-zinc-900 h-10 w-10" />
-        <div className="flex-1 space-y-4 py-1">
+        <div className="flex-1 space-y-4">
           <div className="h-6 bg-gray-200 dark:bg-zinc-900 rounded w-1/4" />
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded w-1/2" />
-            <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded w-1/3" />
+          <div className="mt-1">
+            <div className="h-3 bg-gray-200 dark:bg-zinc-900 rounded w-1/2" />
           </div>
         </div>
       </div>

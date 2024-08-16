@@ -1,6 +1,6 @@
 'use client'
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@troith/shared'
-import { Home, NotebookText, Pyramid, ScrollText } from 'lucide-react'
+import { Home, NotebookText, Pyramid, ScrollText, UsersRound } from 'lucide-react'
 import { useRouter } from 'next-nprogress-bar'
 import { usePathname } from 'next/navigation'
 
@@ -67,6 +67,16 @@ export const ToolCommandBar = ({ shouldOpen, onOpenChange }: Props) => {
           >
             <Pyramid className="mr-2 h-4 w-4" />
             <span>Items</span>
+          </CommandItem>
+          <CommandItem
+            defaultChecked={pathname.includes('/tool/parties')}
+            onSelect={() => {
+              handleRouting('/tool/parties')
+              onOpenChange && onOpenChange(false)
+            }}
+          >
+            <UsersRound className="mr-2 h-4 w-4" />
+            <span>Parties</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>
