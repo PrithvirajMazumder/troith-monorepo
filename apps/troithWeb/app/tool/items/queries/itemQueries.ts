@@ -1,15 +1,24 @@
 import { gql } from '@troithWeb/__generated__'
 
 export const ItemQueries = {
-  itemsByCompanyId: gql(`query GetItems($companyId: String!) {
+  all: gql(`query GetItems($companyId: String!) {
   items(companyId: $companyId) {
     id
     name
     hsn
+    company {
+      id
+      name
+    }
+    tax {
+      id
+      cgst
+      sgst
+    }
     uom {
       id
-      abbreviation
       name
+      abbreviation
     }
   }
 }`),

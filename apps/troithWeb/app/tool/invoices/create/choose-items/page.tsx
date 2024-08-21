@@ -22,7 +22,7 @@ export default function SelectItemsCreateInvoicePage() {
   const { selectedItems: previouslySelectedItems, selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
   const [selectedItems, setSelectedItems] = useState<Item[]>(previouslySelectedItems)
   const [selectedItemsMap, setSelectedItemsMap] = useState<ItemsMap>({} as ItemsMap)
-  const { data: itemsData } = useSuspenseQuery(ItemQueries.itemsByCompanyId, {
+  const { data: itemsData } = useSuspenseQuery(ItemQueries.all, {
     variables: { companyId: selectedCompany?.id ?? '' }
   })
   const router = useRouter()
