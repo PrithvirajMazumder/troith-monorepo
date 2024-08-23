@@ -246,7 +246,7 @@ export default function AddMisc() {
               {taxationData?.taxes?.map((tax) => {
                 return (
                   <TaxCard
-                    tax={tax}
+                    entity={tax}
                     onSelect={(tax) => {
                       setSelectedTax(tax)
                       setValue('taxation', tax.id ?? '')
@@ -296,7 +296,7 @@ export default function AddMisc() {
                 return (
                   <BankCard
                     isCompact
-                    bank={bank}
+                    entity={bank}
                     onSelect={(bank) => {
                       setSelectedBank(bank)
                       setValue('bank', bank.id)

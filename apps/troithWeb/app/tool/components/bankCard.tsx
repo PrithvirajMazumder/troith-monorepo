@@ -3,16 +3,14 @@ import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4, P, Separator } from '@troith/shared'
 import { CheckCircle, Landmark } from 'lucide-react'
 import React from 'react'
+import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
 
 type Props = {
-  bank: Bank
-  onSelect: (bank: Bank) => void
-  isSelected?: boolean
   shouldShowAvatar?: boolean
   isCompact?: boolean
-}
+} & EntityCardProps<Bank>
 
-export const BankCard = ({ onSelect, bank, isSelected = false, shouldShowAvatar = false, isCompact = false }: Props) => {
+export const BankCard = ({ onSelect, entity: bank, isSelected = false, shouldShowAvatar = false, isCompact = false }: Props) => {
   return (
     <div
       onClick={() => onSelect(bank)}

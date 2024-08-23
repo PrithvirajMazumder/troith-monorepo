@@ -2,12 +2,7 @@ import { Party } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
-
-type Props = {
-  party: Party
-  onSelect?: (party: Party) => void
-  isSelected?: boolean
-}
+import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
 
 export const PartyCardSkeletonLoader = () => {
   return (
@@ -25,7 +20,7 @@ export const PartyCardSkeletonLoader = () => {
   )
 }
 
-export const PartyCard = ({ party, onSelect, isSelected = false }: Props) => {
+export const PartyCard = ({ entity: party, onSelect, isSelected = false }: EntityCardProps<Party>) => {
   return (
     <div
       onClick={() => onSelect && onSelect(party)}

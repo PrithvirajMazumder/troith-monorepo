@@ -33,7 +33,7 @@ export default function Items() {
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
         {itemsData?.items?.map((item) => (
-          <ItemCard onSelect={(item) => router.push(`/tool/items/${item.id}`)} item={item as Item} key={`item-list-${item?.id}`} />
+          <ItemCard onSelect={(item) => router.push(`/tool/items/${item.id}`)} entity={item as Item} key={`item-list-${item?.id}`} />
         ))}
       </motion.div>
     </AnimatePresence>

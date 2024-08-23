@@ -3,12 +3,7 @@ import { cn } from '@troith/shared/lib/util'
 import { Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
 import React from 'react'
-
-export type Props = {
-  item: Item
-  onSelect: (item: Item) => void
-  isSelected?: boolean
-}
+import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
 
 export const ItemCardSkeletonLoader = () => {
   return (
@@ -23,7 +18,7 @@ export const ItemCardSkeletonLoader = () => {
   )
 }
 
-export const ItemCard = ({ onSelect, isSelected = false, item }: Props) => {
+export const ItemCard = ({ onSelect, isSelected = false, entity: item }: EntityCardProps<Item>) => {
   return (
     <div
       onClick={() => onSelect(item)}

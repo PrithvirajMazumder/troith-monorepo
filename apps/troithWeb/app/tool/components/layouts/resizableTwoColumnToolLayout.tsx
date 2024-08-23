@@ -9,9 +9,10 @@ type Props = {
   secondColClassName?: string
   autoSaveId?: string
   onResize?: (size: number) => void
+  shouldShowHandle?: boolean
 }
 
-export const ResizableTwoColumnToolLayout = ({ firstCol, secondCol, ...otherProps }: Props) => (
+export const ResizableTwoColumnToolLayout = ({ firstCol, secondCol, shouldShowHandle = true, ...otherProps }: Props) => (
   <ResizablePanelGroup
     {...(otherProps?.autoSaveId?.length
       ? {
@@ -25,7 +26,7 @@ export const ResizableTwoColumnToolLayout = ({ firstCol, secondCol, ...otherProp
     </ResizablePanel>
     {secondCol ? (
       <>
-        <ResizableHandle withHandle />
+        {shouldShowHandle && <ResizableHandle withHandle />}
         <ResizablePanel
           {...(otherProps?.onResize ? { onResize: otherProps.onResize } : {})}
           className={otherProps.secondColClassName}

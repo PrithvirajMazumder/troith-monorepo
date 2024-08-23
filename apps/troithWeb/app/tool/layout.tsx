@@ -24,6 +24,7 @@ import {
   LogOut,
   Moon,
   NotebookText,
+  PencilRuler,
   Pyramid,
   ScrollText,
   Settings,
@@ -68,7 +69,7 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
             <DialogBody>
               <div className="w-full flex flex-col gap-2">
                 {companies?.map((company) => (
-                  <CompanyCard company={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
+                  <CompanyCard entity={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
                 ))}
               </div>
             </DialogBody>
@@ -154,6 +155,9 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
                 icon={Pyramid}
               >
                 Items
+              </NavMenu>
+              <NavMenu variant={pathname.includes('uoms') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/uoms" icon={PencilRuler}>
+                Units
               </NavMenu>
               <NavMenu variant={pathname.includes('parties') ? 'default' : 'ghost'} iconOnly={isCollapsed} href="/tool/parties" icon={UsersRound}>
                 Parties

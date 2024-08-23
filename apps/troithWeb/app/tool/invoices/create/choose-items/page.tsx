@@ -57,7 +57,7 @@ export default function SelectItemsCreateInvoicePage() {
               {itemsData?.items
                 ?.filter((item) => selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
                 ?.map((item) => (
-                  <ItemCard isSelected={!!selectedItemsMap[item.id]} item={item as Item} key={item?.id} onSelect={handleItemSelection} />
+                  <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item as Item} key={item?.id} onSelect={handleItemSelection} />
                 ))}
             </AccordionContent>
           </AccordionItem>
@@ -67,7 +67,7 @@ export default function SelectItemsCreateInvoicePage() {
         {itemsData?.items
           ?.filter((item) => !selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
           ?.map((item) => (
-            <ItemCard isSelected={!!selectedItemsMap[item.id]} item={item as Item} key={item?.id} onSelect={handleItemSelection} />
+            <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item as Item} key={item?.id} onSelect={handleItemSelection} />
           ))}
       </motion.div>
       <Button

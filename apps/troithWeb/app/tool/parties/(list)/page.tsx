@@ -33,7 +33,7 @@ export default function Parties() {
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
         {partiesData?.parties?.map((party) => (
-          <PartyCard onSelect={(party) => router.push(`/tool/parties/${party.id}`)} party={party as Party} key={`party-list-${party?.id}`} />
+          <PartyCard onSelect={(party) => router.push(`/tool/parties/${party.id}`)} entity={party as Party} key={`party-list-${party?.id}`} />
         ))}
       </motion.div>
     </AnimatePresence>

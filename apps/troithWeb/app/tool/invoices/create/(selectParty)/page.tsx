@@ -42,7 +42,7 @@ export default function SelectPartyCreateInvoicePage() {
             isSelected={party.id === selectedParty?.id}
             onSelect={handlePartySelection}
             key={`party-card-create-invoice-${party?.id}`}
-            party={party as Party}
+            entity={party as Party}
           />
         ))}
       </motion.div>

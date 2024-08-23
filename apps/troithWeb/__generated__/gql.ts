@@ -29,6 +29,7 @@ const documents = {
     "query ItemsByIds($ids: [String!]!) {\n  itemsByIds(items: { ids: $ids }) {\n    id\n    name\n    hsn\n    uom {\n      id\n      abbreviation\n      name\n    }\n  }\n}": types.ItemsByIdsDocument,
     "mutation CreateParty(\n      $name: String!\n      $addressLine1: String!\n      $addressLine2: String!\n      $zipCode: Int!\n      $state: String!\n      $city: String!\n      $companyId: String!\n      $gstin: String!\n      $partyItemIds: [String!]!\n    ) {\n      createParty(createPartyInput: {\n        name: $name\n        addressLine1: $addressLine1\n        addressLine2: $addressLine2\n        zipCode: $zipCode\n        state: $state\n        city: $city\n        companyId: $companyId\n        gstin: $gstin\n        partyItemIds: $partyItemIds\n      }) {\n        id\n      }\n  }": types.CreatePartyDocument,
     "query GetParties($companyId: String!) {\n  parties(companyId: $companyId) {\n    id\n    name\n    gstin\n    state\n    partyItemIds\n    company {\n      legalName\n    }\n  }\n}": types.GetPartiesDocument,
+    "query GetUoms($companyId: String!) {\n    companyUoms(companyId: $companyId) {\n      id\n      abbreviation\n      name\n    }\n  }": types.GetUomsDocument,
 };
 
 /**
@@ -109,6 +110,10 @@ export function gql(source: "mutation CreateParty(\n      $name: String!\n      
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "query GetParties($companyId: String!) {\n  parties(companyId: $companyId) {\n    id\n    name\n    gstin\n    state\n    partyItemIds\n    company {\n      legalName\n    }\n  }\n}"): (typeof documents)["query GetParties($companyId: String!) {\n  parties(companyId: $companyId) {\n    id\n    name\n    gstin\n    state\n    partyItemIds\n    company {\n      legalName\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "query GetUoms($companyId: String!) {\n    companyUoms(companyId: $companyId) {\n      id\n      abbreviation\n      name\n    }\n  }"): (typeof documents)["query GetUoms($companyId: String!) {\n    companyUoms(companyId: $companyId) {\n      id\n      abbreviation\n      name\n    }\n  }"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};
