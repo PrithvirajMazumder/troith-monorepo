@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  FormField,
   Input,
   Label,
   Popover,
@@ -20,7 +21,6 @@ import {
 } from '@troith/shared'
 import { useForm } from 'react-hook-form'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
-import { FormField } from '@troith/shared/components/ui/form-field'
 import { useLazyQuery, useSuspenseQuery } from '@apollo/client'
 import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
@@ -28,7 +28,7 @@ import { DialogBody } from 'next/dist/client/components/react-dev-overlay/intern
 import { useEffect, useState } from 'react'
 import { BankQueries } from '@troithWeb/app/queries/bankQueries'
 import { BankCard } from '@troithWeb/app/tool/components/bankCard'
-import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from '@troithWeb/app/tool/invoices/create/finalize-invoice/schemas'
+import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from 'apps/troithWeb/app/tool/invoices/create/finalize-invoice/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
 import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
@@ -44,8 +44,7 @@ import { usePathname } from 'next/navigation'
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
   const pathname = usePathname()
-  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate, setSelectedInvoiceNumber } =
-    useCreateInvoice()
+  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const router = useRouter()
   const { toast } = useToast()
   const { createInvoice } = useFinalizeInvoice()

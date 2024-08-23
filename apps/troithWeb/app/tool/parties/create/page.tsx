@@ -13,22 +13,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  FormField,
   Input,
   Popover,
   PopoverContent,
   PopoverTrigger,
   Separator
 } from '@troith/shared'
-import { FormField } from '@troith/shared/components/ui/form-field'
 import { useMutation, useSuspenseQuery } from '@apollo/client'
 import { StateQueries } from '@troithWeb/app/queries/stateQueries'
 import { Check, ChevronRight, ChevronsUpDown, Loader } from 'lucide-react'
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '@troith/shared/lib/util'
 import { useForm } from 'react-hook-form'
-import { CreatePartyFormFields, CreatePartySchema } from '@troithWeb/app/tool/parties/create/schemas'
+import { CreatePartyFormFields, CreatePartySchema } from 'apps/troithWeb/app/tool/parties/create/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect, useState } from 'react'
 import { PartyMutations } from '@troithWeb/app/tool/parties/queries/partyMutations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { useToast } from '@troith/shared/hooks/use-toast'
@@ -50,7 +49,6 @@ export default function CreatePartyPage() {
     formState: { errors },
     watch,
     setValue,
-    clearErrors,
     register,
     handleSubmit,
     trigger
@@ -116,7 +114,7 @@ export default function CreatePartyPage() {
           <FormField hasError={!!errors?.name?.message} label="Party name" hint={errors?.name?.message ?? "Please enter your party's legal name"}>
             <Input
               {...register('name', {
-                onChange: () => clearErrors('name')
+                onChange: () => void trigger('name')
               })}
             />
           </FormField>
@@ -130,7 +128,7 @@ export default function CreatePartyPage() {
           >
             <Input
               {...register('gstin', {
-                onChange: () => clearErrors('gstin')
+                onChange: () => void trigger('gstin')
               })}
               maxLength={15}
               minLength={15}
@@ -146,14 +144,14 @@ export default function CreatePartyPage() {
           >
             <Input
               {...register('addressLine1', {
-                onChange: () => clearErrors('addressLine1')
+                onChange: () => void trigger('addressLine1')
               })}
             />
           </FormField>
           <FormField label="Address Line 2 (optional)" hint="Please provide any additional address details for your party.">
             <Input
               {...register('addressLine2', {
-                onChange: () => clearErrors('addressLine2')
+                onChange: () => void trigger('addressLine2')
               })}
             />
           </FormField>
@@ -177,7 +175,7 @@ export default function CreatePartyPage() {
                             onSelect={() => {
                               setValue('state', indianState.value)
                               setIsStatePopupOpen(false)
-                              clearErrors('state')
+                              void trigger('state')
                             }}
                             key={indianState.value}
                             value={indianState.displayName}
@@ -195,7 +193,7 @@ export default function CreatePartyPage() {
             <FormField label="City" hasError={!!errors?.city?.message} hint={errors?.city?.message ?? ''}>
               <Input
                 {...register('city', {
-                  onChange: () => clearErrors('city')
+                  onChange: () => void trigger('city')
                 })}
               />
             </FormField>
@@ -207,7 +205,7 @@ export default function CreatePartyPage() {
                 minLength={6}
                 type="number"
                 {...register('zipCode', {
-                  onChange: () => clearErrors('zipCode')
+                  onChange: () => void trigger('zipCode')
                 })}
               />
             </FormField>

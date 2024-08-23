@@ -6,22 +6,22 @@ import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
 import { X } from 'lucide-react'
 
-export default function CreatePartyLayout({ children }: PropsWithChildren) {
+export default function CreateItemLayout({ children }: PropsWithChildren) {
   return (
     <>
       <header {...animateBasicMotionOpacity()} className="border-b px-4 pb-4">
         <div className="flex items-center gap-2 h-16">
-          <H3>Create Party</H3>
-          <Link className={cn('ml-auto', buttonVariants({ variant: 'ghost', size: 'icon' }))} href="/tool/parties">
+          <H3>Create Item</H3>
+          <Link className={cn('ml-auto', buttonVariants({ variant: 'ghost', size: 'icon' }))} href="/tool/items">
             <X className="w-4 h-4" />
           </Link>
         </div>
         <p className="text-muted-foreground text-sm">
-          By setting up a party, you can choose that party when creating invoices and challans, allowing for automatic pre-filling of party-related
-          information.
+          Creating a reusable item allows you to streamline the process of generating invoices and challans. This reduces repetitive data entry and
+          ensures consistency across your financial documents.
         </p>
       </header>
-      <ResizablePanelGroup autoSaveId="CREATE_PARTY_FORM_REZISABLE_FORM" direction="horizontal" className=" h-full w-full">
+      <ResizablePanelGroup autoSaveId="CREATE_ITEM_FORM_REZISABLE_FORM" direction="horizontal" className=" h-full w-full">
         <ResizablePanel defaultSize={70} minSize={70} maxSize={80}>
           <ScrollArea className="px-4 pt-4 pb-20 h-full w-full relative">{children}</ScrollArea>
         </ResizablePanel>
