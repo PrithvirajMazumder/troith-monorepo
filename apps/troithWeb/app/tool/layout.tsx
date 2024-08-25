@@ -41,7 +41,6 @@ import { useToolCommand } from '@troithWeb/app/components/toolCommandBar/hooks/u
 import { CompanyStoreProvider, useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { cn } from '@troith/shared/lib/util'
 import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
-import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
 import { Company } from '@troithWeb/__generated__/graphql'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
@@ -66,13 +65,11 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
             <DialogHeader>
               <DialogTitle>Select a company</DialogTitle>
             </DialogHeader>
-            <DialogBody>
-              <div className="w-full flex flex-col gap-2">
-                {companies?.map((company) => (
-                  <CompanyCard entity={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
-                ))}
-              </div>
-            </DialogBody>
+            <div className="w-full flex flex-col gap-2">
+              {companies?.map((company) => (
+                <CompanyCard entity={company} key={`select-company-list-modal-${company.id}`} onSelect={handleCompanySelection} />
+              ))}
+            </div>
           </DialogContent>
         </DialogPortal>
       </Dialog>

@@ -24,7 +24,6 @@ import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/co
 import { useLazyQuery, useSuspenseQuery } from '@apollo/client'
 import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
-import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 import { useEffect, useState } from 'react'
 import { BankQueries } from '@troithWeb/app/queries/bankQueries'
 import { BankCard } from '@troithWeb/app/tool/components/bankCard'
@@ -242,22 +241,20 @@ export default function AddMisc() {
               <DialogTitle>Taxation</DialogTitle>
               <DialogDescription>Choose a GST scheme for your invoice.</DialogDescription>
             </DialogHeader>
-            <DialogBody>
-              {taxationData?.taxes?.map((tax) => {
-                return (
-                  <TaxCard
-                    entity={tax}
-                    onSelect={(tax) => {
-                      setSelectedTax(tax)
-                      setValue('taxation', tax.id ?? '')
-                      setIsTaxationDialogOpen(false)
-                      void trigger('taxation')
-                    }}
-                    key={tax.id}
-                  />
-                )
-              })}
-            </DialogBody>
+            {taxationData?.taxes?.map((tax) => {
+              return (
+                <TaxCard
+                  entity={tax}
+                  onSelect={(tax) => {
+                    setSelectedTax(tax)
+                    setValue('taxation', tax.id ?? '')
+                    setIsTaxationDialogOpen(false)
+                    void trigger('taxation')
+                  }}
+                  key={tax.id}
+                />
+              )
+            })}
           </DialogContent>
         </Dialog>
         <FormField
@@ -291,23 +288,21 @@ export default function AddMisc() {
               <DialogTitle>Bank</DialogTitle>
               <DialogDescription>Choose a bank for your invoice.</DialogDescription>
             </DialogHeader>
-            <DialogBody>
-              {bankData?.banks?.map((bank) => {
-                return (
-                  <BankCard
-                    isCompact
-                    entity={bank}
-                    onSelect={(bank) => {
-                      setSelectedBank(bank)
-                      setValue('bank', bank.id)
-                      setIsBankDialogOpen(false)
-                      void trigger('bank')
-                    }}
-                    key={bank.id}
-                  />
-                )
-              })}
-            </DialogBody>
+            {bankData?.banks?.map((bank) => {
+              return (
+                <BankCard
+                  isCompact
+                  entity={bank}
+                  onSelect={(bank) => {
+                    setSelectedBank(bank)
+                    setValue('bank', bank.id)
+                    setIsBankDialogOpen(false)
+                    void trigger('bank')
+                  }}
+                  key={bank.id}
+                />
+              )
+            })}
           </DialogContent>
         </Dialog>
         <Separator className="my-4" />
