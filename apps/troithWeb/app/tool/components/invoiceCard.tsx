@@ -10,18 +10,18 @@ type Props = {
 
 export const InvoiceSkeletonLoader = () => {
   return (
-    <div className="bg-white rounded-lg p-3 animate-pulse border">
+    <div className="bg-background rounded-lg p-3 animate-pulse border">
       <div className="flex justify-between items-center mb-2">
-        <div className="h-4 bg-gray-200 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 rounded-full w-1/6" />
+        <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded w-1/3" />
+        <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded-full w-1/6" />
       </div>
       <div className="flex justify-between items-center mb-2">
-        <div className="h-2 bg-gray-200 rounded w-1/4" />
+        <div className="h-2 bg-gray-200 dark:bg-zinc-900 rounded w-1/4" />
       </div>
       <div className="h-4 bg-transparent rounded w-1/5 mb-3" />
       <div className="flex items-center gap-2">
-        <div className="h-4 bg-gray-200 rounded-full w-20" />
-        <div className="h-4 bg-gray-200 rounded-full w-20" />
+        <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded-full w-20" />
+        <div className="h-4 bg-gray-200 dark:bg-zinc-900 rounded-full w-20" />
       </div>
     </div>
   )
@@ -46,8 +46,18 @@ export const InvoiceCard = ({ invoice }: Props) => {
       href={`/tool/invoices/${invoice.id}`}
       className={cn(
         'flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all w-full',
-        `bg-${getInvoiceStatusColor(invoice.status)}-500/5 dark:bg-${getInvoiceStatusColor(invoice.status)}-800/5`,
-        `hover:bg-${getInvoiceStatusColor(invoice.status)}-500/10 dark:hover:bg-${getInvoiceStatusColor(invoice.status)}-800/10`
+        {
+          'bg-blue-500/5 dark:border-blue-500/30 dark:bg-blue-800/10 dark:hover:bg-blue-800/20 hover:bg-blue-500/10':
+            invoice.status === InvoiceStatus.Confirmed
+        },
+        {
+          'bg-orange-500/5 dark:border-orange-500/30 dark:bg-orange-800/10 dark:hover:bg-orange-800/20 hover:bg-orange-500/10':
+            invoice.status === InvoiceStatus.Draft
+        },
+        {
+          'bg-green-500/5 dark:border-green-500/30 dark:bg-green-800/10 dark:hover:bg-green-800/20 hover:bg-green-500/10':
+            invoice.status === InvoiceStatus.Paid
+        }
       )}
     >
       <div className="flex w-full flex-col gap-1">
@@ -72,7 +82,11 @@ export const InvoiceCard = ({ invoice }: Props) => {
       <div className="flex items-center gap-2">
         <Badge
           variant="outline"
-          className={cn(`bg-${getInvoiceStatusColor(invoice.status)}-100 dark:bg-${getInvoiceStatusColor(invoice.status)}-950`)}
+          className={cn(
+            { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.Paid },
+            { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.Draft },
+            { 'bg-blue-100/50 0 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.Confirmed }
+          )}
         >
           {invoice?.status}
         </Badge>

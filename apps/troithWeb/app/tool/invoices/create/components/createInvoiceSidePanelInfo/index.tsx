@@ -22,7 +22,6 @@ import { MousePointerClick, Zap } from 'lucide-react'
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
-import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
@@ -120,7 +119,7 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
           setPdfBase64(pdfBase64)
         })
     }
-  }, [pathname])
+  }, [pathname, selectedBank, selectedDate, selectedTax])
 
   useEffect(() => {
     setPdfContainerWidth(containerRef?.current?.clientWidth ?? 0)
@@ -243,19 +242,17 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
             <DialogHeader>
               <DialogTitle>PDF Expanded</DialogTitle>
             </DialogHeader>
-            <DialogBody>
-              <div ref={pdfExpandedDialogRef} className="w-full h-max border border-dashed rounded-lg overflow-hidden bg-white dark:opacity-90">
-                {pdfBase64?.length ? (
-                  <PdfViewer
-                    uniqueIdentityForPageKey="create-invoice-pdf-page"
-                    className="overflow-y-scroll min-h-[calc(100svh-20rem)] min-w-[20rem]"
-                    key={pdfExpandedDialogRef?.current?.offsetWidth + 'create-invoice-side-info-panel'}
-                    pdfBase64={pdfBase64}
-                    pageWidth={460}
-                  />
-                ) : null}
-              </div>
-            </DialogBody>
+            <div ref={pdfExpandedDialogRef} className="w-full h-max border border-dashed rounded-lg overflow-hidden bg-white dark:opacity-90">
+              {pdfBase64?.length ? (
+                <PdfViewer
+                  uniqueIdentityForPageKey="create-invoice-pdf-page"
+                  className="overflow-y-scroll min-h-[calc(100svh-20rem)] min-w-[20rem]"
+                  key={pdfExpandedDialogRef?.current?.offsetWidth + 'create-invoice-side-info-panel'}
+                  pdfBase64={pdfBase64}
+                  pageWidth={460}
+                />
+              ) : null}
+            </div>
           </DialogContent>
         </DialogPortal>
       </Dialog>

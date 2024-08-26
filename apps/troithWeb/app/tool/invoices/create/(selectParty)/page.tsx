@@ -9,12 +9,14 @@ import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/co
 import { useRouter } from 'next-nprogress-bar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 
 export default function SelectPartyCreateInvoicePage() {
-  const router = useRouter()
+  const { selectedCompany } = useCompanyStore()
   const { data: partiesData } = useSuspenseQuery(PartyQueries.partiesByCompanyId, {
-    variables: { companyId: '658db32a6cf334fc362c9cad' }
+    variables: { companyId: selectedCompany?.id ?? '' }
   })
+  const router = useRouter()
   const { setSelectedParty, selectedParty } = useCreateInvoice()
 
   const handlePartySelection = (party: Party) => {
@@ -40,7 +42,7 @@ export default function SelectPartyCreateInvoicePage() {
             isSelected={party.id === selectedParty?.id}
             onSelect={handlePartySelection}
             key={`party-card-create-invoice-${party?.id}`}
-            party={party as Party}
+            entity={party as Party}
           />
         ))}
       </motion.div>

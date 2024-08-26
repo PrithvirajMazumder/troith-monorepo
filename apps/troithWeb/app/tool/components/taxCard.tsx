@@ -3,16 +3,27 @@ import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle, PercentDiamond } from 'lucide-react'
 import React from 'react'
+import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
 
 type Props = {
-  tax: Tax
-  onSelect: (tax: Tax) => void
-  isSelected?: boolean
   shouldShowAvatar?: boolean
   titleClassName?: string
+} & EntityCardProps<Tax>
+
+export const UomCardSkeletonLoader = () => {
+  return (
+    <div className="p-3 w-full bg-background border rounded-lg">
+      <div className="animate-pulse flex space-x-4">
+        <div className="rounded-full bg-gray-200 dark:bg-zinc-900 h-10 w-10" />
+        <div className="flex-1 space-y-4">
+          <div className="h-6 bg-gray-200 dark:bg-zinc-900 rounded w-1/4" />
+        </div>
+      </div>
+    </div>
+  )
 }
 
-export const TaxCard = ({ onSelect, tax, isSelected = false, shouldShowAvatar = false, titleClassName }: Props) => {
+export const TaxCard = ({ onSelect, entity: tax, isSelected = false, shouldShowAvatar = false, titleClassName }: Props) => {
   return (
     <div
       onClick={() => onSelect(tax)}

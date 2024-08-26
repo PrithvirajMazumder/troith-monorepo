@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  FormField,
   Input,
   Label,
   Popover,
@@ -20,15 +21,13 @@ import {
 } from '@troith/shared'
 import { useForm } from 'react-hook-form'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
-import { FormField } from '@troith/shared/components/ui/form-field'
 import { useLazyQuery, useSuspenseQuery } from '@apollo/client'
 import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
-import { DialogBody } from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog'
 import { useEffect, useState } from 'react'
 import { BankQueries } from '@troithWeb/app/queries/bankQueries'
 import { BankCard } from '@troithWeb/app/tool/components/bankCard'
-import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from '@troithWeb/app/tool/invoices/create/finalize-invoice/schemas'
+import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from 'apps/troithWeb/app/tool/invoices/create/finalize-invoice/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
 import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
@@ -44,15 +43,16 @@ import { usePathname } from 'next/navigation'
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
   const pathname = usePathname()
-  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate, setSelectedInvoiceNumber } =
-    useCreateInvoice()
+  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const router = useRouter()
   const { toast } = useToast()
   const { createInvoice } = useFinalizeInvoice()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
   const { data: bankData } = useSuspenseQuery(BankQueries.all)
-  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber)
+  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber, {
+    fetchPolicy: 'network-only'
+  })
   const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isInvoiceNumberPresentLoading }] = useLazyQuery(
     InvoiceQueries.getInvoiceNumberWithNo
   )
@@ -100,7 +100,7 @@ export default function AddMisc() {
   }, [pathname])
 
   const validateInvoiceNumber = (invoiceNumberData: GetInvoiceNumberWithNoQuery | null | undefined): boolean => {
-    if (invoiceNumberData) {
+    if (invoiceNumberData?.invoiceByNo) {
       setError('invoiceNumber', {
         message: 'This invoice number cannot be used, an invoice is already present with this number'
       })
@@ -156,7 +156,7 @@ export default function AddMisc() {
               toast({
                 variant: 'destructive',
                 title: 'Uh oh! Something went wrong!',
-                description: 'Seems like this invoice can be created right now.'
+                description: "Seems like this invoice can't be created right now."
               })
               setIsSubmitting(false)
             }
@@ -241,22 +241,20 @@ export default function AddMisc() {
               <DialogTitle>Taxation</DialogTitle>
               <DialogDescription>Choose a GST scheme for your invoice.</DialogDescription>
             </DialogHeader>
-            <DialogBody>
-              {taxationData?.taxes?.map((tax) => {
-                return (
-                  <TaxCard
-                    tax={tax}
-                    onSelect={(tax) => {
-                      setSelectedTax(tax)
-                      setValue('taxation', tax.id ?? '')
-                      setIsTaxationDialogOpen(false)
-                      void trigger('taxation')
-                    }}
-                    key={tax.id}
-                  />
-                )
-              })}
-            </DialogBody>
+            {taxationData?.taxes?.map((tax) => {
+              return (
+                <TaxCard
+                  entity={tax}
+                  onSelect={(tax) => {
+                    setSelectedTax(tax)
+                    setValue('taxation', tax.id ?? '')
+                    setIsTaxationDialogOpen(false)
+                    void trigger('taxation')
+                  }}
+                  key={tax.id}
+                />
+              )
+            })}
           </DialogContent>
         </Dialog>
         <FormField
@@ -290,23 +288,21 @@ export default function AddMisc() {
               <DialogTitle>Bank</DialogTitle>
               <DialogDescription>Choose a bank for your invoice.</DialogDescription>
             </DialogHeader>
-            <DialogBody>
-              {bankData?.banks?.map((bank) => {
-                return (
-                  <BankCard
-                    isCompact
-                    bank={bank}
-                    onSelect={(bank) => {
-                      setSelectedBank(bank)
-                      setValue('bank', bank.id)
-                      setIsBankDialogOpen(false)
-                      void trigger('bank')
-                    }}
-                    key={bank.id}
-                  />
-                )
-              })}
-            </DialogBody>
+            {bankData?.banks?.map((bank) => {
+              return (
+                <BankCard
+                  isCompact
+                  entity={bank}
+                  onSelect={(bank) => {
+                    setSelectedBank(bank)
+                    setValue('bank', bank.id)
+                    setIsBankDialogOpen(false)
+                    void trigger('bank')
+                  }}
+                  key={bank.id}
+                />
+              )
+            })}
           </DialogContent>
         </Dialog>
         <Separator className="my-4" />
