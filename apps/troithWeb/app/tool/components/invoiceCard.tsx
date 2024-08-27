@@ -28,19 +28,6 @@ export const InvoiceSkeletonLoader = () => {
 }
 
 export const InvoiceCard = ({ invoice }: Props) => {
-  const getInvoiceStatusColor = (status: InvoiceStatus) => {
-    switch (status) {
-      case InvoiceStatus.Confirmed:
-        return 'blue'
-      case InvoiceStatus.Draft:
-        return 'zinc'
-      case InvoiceStatus.Paid:
-        return 'green'
-      default:
-        return 'zinc'
-    }
-  }
-
   return (
     <Link
       href={`/tool/invoices/${invoice.id}`}
