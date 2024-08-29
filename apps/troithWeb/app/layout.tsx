@@ -1,10 +1,10 @@
 'use client'
-import './global.css'
-import { PropsWithChildren } from 'react'
-import { Inter as FontSans } from 'next/font/google'
-import { cn } from '@troith/shared/lib/util'
 import { ThemeProvider, Toaster } from '@troith/shared'
+import { cn } from '@troith/shared/lib/util'
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
+import { Inter as FontSans } from 'next/font/google'
+import { PropsWithChildren } from 'react'
+import './global.css'
 
 const fontSans = FontSans({
   subsets: ['latin'],
