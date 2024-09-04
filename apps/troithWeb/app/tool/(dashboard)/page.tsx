@@ -1,140 +1,10 @@
 'use client'
-import { Area, AreaChart, CartesianGrid, Line, LineChart, XAxis } from 'recharts'
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, H1, H4 } from '@troith/shared'
-import { convertAmountToInr } from '@troithWeb/utils/currency'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@troith/shared/components/ui/card'
-import { useEffect } from 'react'
-import { useLazyQuery } from '@apollo/client'
 import { DashboardQueries } from '@troithWeb/app/tool/(dashboard)/queries/dashboardQueries'
+import { useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, H1, H4 } from '@troith/shared'
+import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { InvoiceCountChart } from '@troithWeb/app/tool/(dashboard)/components/InvoiceCountChart'
-
-const lineChartData = [
-  { month: 'January', earnings: 186 },
-  { month: 'February', earnings: 305 },
-  { month: 'March', earnings: 237 },
-  { month: 'April', earnings: 73 },
-  { month: 'May', earnings: 209 },
-  { month: 'June', earnings: 214 }
-]
-
-const lineChartConfig = {
-  earnings: {
-    label: 'Desktop',
-    color: 'hsl(var(--foreground))'
-  }
-} satisfies ChartConfig
-
-export function LineComponent() {
-  return (
-    <Card className="w-[30%]">
-      <CardHeader>
-        <CardTitle className="text-muted-foreground">Earnings</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          style={{
-            width: '100%',
-            height: 200
-          }}
-          config={lineChartConfig}
-        >
-          <LineChart
-            accessibilityLayer
-            data={lineChartData}
-            margin={{
-              left: 12,
-              right: 12
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" axisLine={false} tickMargin={8} tickFormatter={(value) => value.slice(0, 3)} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Line dataKey="earnings" type="linear" stroke="var(--color-earnings)" strokeWidth={3} dot />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  )
-}
-
-const graphChartData = [
-  { month: 'January', paid: 186, draft: 80, confirmed: 45 },
-  { month: 'February', paid: 305, draft: 200, confirmed: 100 },
-  { month: 'March', paid: 237, draft: 120, confirmed: 150 },
-  { month: 'April', paid: 73, draft: 190, confirmed: 50 },
-  { month: 'May', paid: 209, draft: 130, confirmed: 100 },
-  { month: 'June', paid: 214, draft: 140, confirmed: 160 }
-]
-
-const graphChartConfig = {
-  paid: {
-    label: 'Paid',
-    color: 'rgb(var(--chart-status-paid))'
-  },
-  draft: {
-    label: 'Draft',
-    color: 'rgb(var(--chart-status-draft))'
-  },
-  confirmed: {
-    label: 'Confirmed',
-    color: 'rgb(var(--chart-status-confirmed))'
-  }
-} satisfies ChartConfig
-
-export function GraphComponent() {
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-muted-foreground">Invoices composition</CardTitle>
-        <CardDescription>Showing total composition for the last 3 months</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          style={{
-            width: '100%',
-            height: 200
-          }}
-          config={graphChartConfig}
-        >
-          <AreaChart
-            accessibilityLayer
-            data={graphChartData}
-            margin={{
-              left: 12,
-              right: 12,
-              top: 12
-            }}
-            stackOffset="expand"
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" axisLine={false} tickMargin={8} tickFormatter={(value) => value.slice(0, 3)} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-            <Area dataKey="paid" type="natural" fill="var(--color-paid)" fillOpacity={0.6} strokeWidth={3} stroke="var(--color-paid)" stackId="a" />
-            <Area
-              dataKey="confirmed"
-              type="natural"
-              fill="var(--color-confirmed)"
-              fillOpacity={0.3}
-              strokeWidth={3}
-              stroke="var(--color-confirmed)"
-              stackId="a"
-            />
-            <Area
-              dataKey="draft"
-              type="natural"
-              fill="var(--color-draft)"
-              fillOpacity={0.1}
-              strokeWidth={3}
-              stroke="var(--color-draft)"
-              stackId="a"
-            />
-          </AreaChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  )
-}
+import { useLazyQuery } from '@apollo/client'
 
 export default function DashboardPage() {
   const [fetchInvoicesCountByDateRange, { loading: invoicesCountByDateRangeLoading, data: invoicesCountByDateRangeData }] = useLazyQuery(
@@ -153,10 +23,69 @@ export default function DashboardPage() {
   return (
     <div className="w-full p-4">
       <div className="mt-4 mb-6 flex items-start gap-4">
-        <span>
-          <H4 className="text-muted-foreground">Total revenue</H4>
-          <H1>{convertAmountToInr(54879843)}</H1>
-        </span>
+        <Card className="flex-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          </CardContent>
+        </Card>
+        <Card className="flex-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          </CardContent>
+        </Card>
+        <Card className="flex-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          </CardContent>
+        </Card>
       </div>
       <div className="flex flex-col gap-4 w-full">
         {invoicesCountByDateRangeLoading ? (
@@ -170,10 +99,6 @@ export default function DashboardPage() {
             }))}
           />
         ) : null}
-        <div className="flex items-center gap-4 w-full">
-          <GraphComponent />
-          <LineComponent />
-        </div>
       </div>
     </div>
   )
