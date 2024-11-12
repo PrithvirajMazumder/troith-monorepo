@@ -1,4 +1,3 @@
-'use client'
 import { Loader } from 'lucide-react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { ReactNode, useState } from 'react'

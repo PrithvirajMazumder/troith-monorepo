@@ -147,6 +147,12 @@ export type Invoice = {
   vehicleNumber?: Maybe<Scalars['String']['output']>;
 };
 
+export type InvoiceCountByDateRange = {
+  __typename?: 'InvoiceCountByDateRange';
+  count: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+};
+
 export type InvoiceItem = {
   __typename?: 'InvoiceItem';
   item?: Maybe<Item>;
@@ -159,6 +165,11 @@ export enum InvoiceStatus {
   Draft = 'Draft',
   Paid = 'Paid'
 }
+
+export type InvoicesCountByDateRangeInput = {
+  endingDate?: InputMaybe<Scalars['String']['input']>;
+  monthsFromStart?: InputMaybe<Scalars['Int']['input']>;
+};
 
 export type Item = {
   __typename?: 'Item';
@@ -369,6 +380,7 @@ export type Query = {
   indianStates: Array<State>;
   invoice?: Maybe<Invoice>;
   invoiceByNo?: Maybe<Invoice>;
+  invoiceCountByDateRange: Array<InvoiceCountByDateRange>;
   invoices: Array<Invoice>;
   item: Item;
   items: Array<Item>;
@@ -417,6 +429,11 @@ export type QueryInvoiceArgs = {
 
 export type QueryInvoiceByNoArgs = {
   no: Scalars['String']['input'];
+};
+
+
+export type QueryInvoiceCountByDateRangeArgs = {
+  invoicesCountByDateRangeInput: InvoicesCountByDateRangeInput;
 };
 
 

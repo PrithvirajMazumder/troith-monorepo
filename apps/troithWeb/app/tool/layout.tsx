@@ -44,6 +44,7 @@ import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
 import { Company } from '@troithWeb/__generated__/graphql'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
+import { signOut } from '@troithWeb/auth'
 
 const ToolLayout = ({ children }: PropsWithChildren) => {
   const { selectedCompany, companies, setSelectedCompany, isSelectCompanyModalOpen, toggleSelectCompanyModal } = useCompanyStore()
@@ -215,7 +216,15 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
               >
                 Light mode
               </NavMenu>
-              <NavMenu iconOnly={isCollapsed} href="#" icon={LogOut}>
+              <NavMenu
+                onClick={(event) => {
+                  event.preventDefault()
+                  void signOut()
+                }}
+                iconOnly={isCollapsed}
+                href="#"
+                icon={LogOut}
+              >
                 Logout
               </NavMenu>
             </div>
