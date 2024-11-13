@@ -12,6 +12,7 @@ model User {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
   Company   Company[]
   Bank      Bank[]
   Uom       Uom[]

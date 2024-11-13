@@ -1,11 +1,13 @@
 model Bank {
-  id            String @id @default(cuid())
+  id            String    @id @default(cuid())
   accountNumber Int
   name          String
   ifsc          String
   branch        String
   userId        String
   holderName    String
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
 
   user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   Invoice Invoice[]

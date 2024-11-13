@@ -1,10 +1,12 @@
 model Item {
-  id        String @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   hsn       Int
   uomId     String
   companyId String
   taxId     String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   uom         Uom           @relation(fields: [uomId], references: [id], onDelete: Cascade)

@@ -1,5 +1,5 @@
 model Company {
-  id           String  @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
   name         String
   legalName    String
@@ -12,6 +12,8 @@ model Company {
   state        String
   city         String
   zipCode      String
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
 
   user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   Item    Item[]

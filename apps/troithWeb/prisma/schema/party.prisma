@@ -1,5 +1,5 @@
 model Party {
-  id           String  @id @default(cuid())
+  id           String    @id @default(cuid())
   nickName     String?
   name         String
   addressLine1 String
@@ -9,6 +9,8 @@ model Party {
   zipCode      Int
   companyId    String
   gstin        String
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
 
   company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   PartyItem PartyItem[]

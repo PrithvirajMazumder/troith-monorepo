@@ -1,7 +1,9 @@
 model Tax {
-  id   String @id @default(cuid())
-  sgst Int
-  cgst Int
+  id        String   @id @default(cuid())
+  sgst      Int
+  cgst      Int
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
 
   Item    Item[]
   Invoice Invoice[]

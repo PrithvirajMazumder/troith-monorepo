@@ -1,12 +1,12 @@
 model Invoice {
-  id            String    @id @default(cuid())
-  no            Int       @unique
+  id            String        @id @default(cuid())
+  no            BigInt        @unique
   vehicleNumber String
   date          DateTime
-  status        String
-  createdAt     DateTime  @default(now())
+  status        InvoiceStatus
+  createdAt     DateTime      @default(now())
   deletedAt     DateTime?
-  shouldUseIgst Boolean   @default(false)
+  shouldUseIgst Boolean       @default(false)
   partyId       String
   companyId     String
   bankId        String
@@ -21,12 +21,18 @@ model Invoice {
 
 model InvoiceItem {
   id           String  @id @default(cuid())
-  quantity     Int
-  price        Int
+  quantity     BigInt
+  price        Decimal
   isPriceTotal Boolean @default(false)
   invoiceId    String
   itemId       String
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   item    Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PAID
 }
