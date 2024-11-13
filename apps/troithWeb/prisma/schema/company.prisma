@@ -11,7 +11,7 @@ model Company {
   addressLine2 String?
   state        String
   city         String
-  zipCode      String
+  zipCode      Int
   createdAt    DateTime  @default(now())
   deletedAt    DateTime?
 
