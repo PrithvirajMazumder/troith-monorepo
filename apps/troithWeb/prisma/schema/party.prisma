@@ -1,0 +1,25 @@
+model Party {
+  id           String  @id @default(cuid())
+  nickName     String?
+  name         String
+  addressLine1 String
+  addressLine2 String?
+  state        String
+  city         String
+  zipCode      Int
+  companyId    String
+  gstin        String
+
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  PartyItem PartyItem[]
+  Invoice   Invoice[]
+}
+
+model PartyItem {
+  id      String @id @default(cuid())
+  itemId  String
+  partyId String
+
+  item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+}

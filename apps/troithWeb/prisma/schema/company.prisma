@@ -1,0 +1,20 @@
+model Company {
+  id           String  @id @default(cuid())
+  userId       String
+  name         String
+  legalName    String
+  gstin        String
+  image        String?
+  phone        String
+  email        String
+  addressLine1 String
+  addressLine2 String?
+  state        String
+  city         String
+  zipCode      String
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Item    Item[]
+  Party   Party[]
+  Invoice Invoice[]
+}

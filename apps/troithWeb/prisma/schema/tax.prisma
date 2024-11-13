@@ -1,0 +1,8 @@
+model Tax {
+  id   String @id @default(cuid())
+  sgst Int
+  cgst Int
+
+  Item    Item[]
+  Invoice Invoice[]
+}

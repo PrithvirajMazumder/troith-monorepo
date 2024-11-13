@@ -1,0 +1,14 @@
+model Item {
+  id        String @id @default(cuid())
+  name      String
+  hsn       Int
+  uomId     String
+  companyId String
+  taxId     String
+
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  uom         Uom           @relation(fields: [uomId], references: [id], onDelete: Cascade)
+  tax         Tax           @relation(fields: [taxId], references: [id], onDelete: Cascade)
+  PartyItem   PartyItem[]
+  InvoiceItem InvoiceItem[]
+}

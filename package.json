@@ -8,7 +8,7 @@
     "dev": "npm run gql-compile && nx run-many -t dev "
   },
   "prisma": {
-    "schema": "./apps/troithWeb/prisma/schema.prisma"
+    "schema": "./apps/troithWeb/prisma/schema"
   },
   "private": true,
   "dependencies": {
