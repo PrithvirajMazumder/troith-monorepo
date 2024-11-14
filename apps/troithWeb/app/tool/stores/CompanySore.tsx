@@ -1,7 +1,6 @@
-import { Company } from '@troithWeb/__generated__/graphql'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
-import { useQuery } from '@apollo/client'
-import { CompanyQueries } from '@troithWeb/app/queries/companyQueries'
+import { useSession } from 'next-auth/react'
+import { Company } from '@prisma/client'
 
 export type CompanySoreValues = {
   selectedCompany: Company | null
@@ -15,16 +14,26 @@ const CompanyStore = createContext<CompanySoreValues>({} as CompanySoreValues)
 
 export const CompanyStoreProvider = ({ children }: PropsWithChildren) => {
   const SelectedCompanyLocalStorageKey = 'SELECTED_COMPANY_LOCAL_STORAGE_KEY'
-  const { data: companiesData } = useQuery(CompanyQueries.allByUserId, {
-    variables: {
-      userId: '658d9270b7894c3d678c37af'
-    }
-  })
+  const { data: session } = useSession()
+  const [companies, setCompanies] = useState<Company[]>([])
   const locallySelectedCompany = localStorage.getItem(SelectedCompanyLocalStorageKey)
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(
     (locallySelectedCompany ? (JSON.parse(locallySelectedCompany) as Company) : null) ?? null
   )
   const [isSelectCompanyModalOpen, setIsSelectCompanyModalOpen] = useState(false)
+
+  const fetchCompanies = async (userId: string) => {
+    const resp = await fetch(`/api/companies/${userId}`)
+    const companies: Company[] = (await resp.json())
+    setCompanies(companies)
+  }
+
+  useEffect(() => {
+    if (session?.user) {
+      console.log('session.user: ', session.user)
+      void fetchCompanies(session?.user?.id ?? '')
+    }
+  }, [session])
 
   useEffect(() => {
     if (selectedCompany) {
@@ -39,7 +48,7 @@ export const CompanyStoreProvider = ({ children }: PropsWithChildren) => {
         toggleSelectCompanyModal: setIsSelectCompanyModalOpen,
         selectedCompany,
         setSelectedCompany,
-        companies: (companiesData?.companies as Company[]) ?? []
+        companies: companies
       }}
     >
       {children}

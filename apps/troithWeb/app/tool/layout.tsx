@@ -42,9 +42,10 @@ import { CompanyStoreProvider, useCompanyStore } from '@troithWeb/app/tool/store
 import { cn } from '@troith/shared/lib/util'
 import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
-import { Company } from '@troithWeb/__generated__/graphql'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 import { signOut } from '@troithWeb/auth'
+import { SessionProvider } from 'next-auth/react'
+import { Company } from '@prisma/client'
 
 const ToolLayout = ({ children }: PropsWithChildren) => {
   const { selectedCompany, companies, setSelectedCompany, isSelectCompanyModalOpen, toggleSelectCompanyModal } = useCompanyStore()
@@ -247,13 +248,15 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
 
 const Providers = ({ children }: PropsWithChildren) => {
   return (
-    <ApolloWrapper>
-      <CompanyStoreProvider>
-        <TooltipProvider>
-          <ToolLayout>{children}</ToolLayout>
-        </TooltipProvider>
-      </CompanyStoreProvider>
-    </ApolloWrapper>
+    <SessionProvider>
+      <ApolloWrapper>
+        <CompanyStoreProvider>
+          <TooltipProvider>
+            <ToolLayout>{children}</ToolLayout>
+          </TooltipProvider>
+        </CompanyStoreProvider>
+      </ApolloWrapper>
+    </SessionProvider>
   )
 }
 

@@ -1,8 +1,8 @@
-import { Company } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
 import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
+import { Company } from '@prisma/client'
 
 export const CompanyCardSkeletonLoader = () => {
   return (

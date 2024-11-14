@@ -41,10 +41,10 @@ import { CompanyStoreProvider, useCompanyStore } from '@troithWeb/app/tool/store
 import { cn } from '@troith/shared/lib/util'
 import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
-import { Company } from '@troithWeb/__generated__/graphql'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 import { NavMenu } from '@troithWeb/app/tool/components/navMenu'
-import { signIn, signOut } from '@troithWeb/auth'
+import { signOut } from '@troithWeb/auth'
+import { Company } from '@prisma/client'
 
 export const ToolLayout = ({ children }: PropsWithChildren) => {
   const { selectedCompany, companies, setSelectedCompany, isSelectCompanyModalOpen, toggleSelectCompanyModal } = useCompanyStore()
