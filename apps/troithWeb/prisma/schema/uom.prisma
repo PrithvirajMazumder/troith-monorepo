@@ -1,10 +1,10 @@
 model Uom {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
   abbreviation String
   userId       String
-  createdAt    DateTime @default(now())
-  deletedAt    DateTime
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
 
   user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   Item Item[]

@@ -1,0 +1,19 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BaseURL}}/api/uoms
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "kilogram",
+    "abbreviation": "kg",
+    "companyId": "cm3ghdycr000214czo7vs4uev"
+  }
+}

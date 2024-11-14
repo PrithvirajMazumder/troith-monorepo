@@ -5,17 +5,7 @@ import { InvoiceRepository } from '@troithWeb/repositories/invoice.repository'
 export async function POST(req: NextRequest) {
   try {
     const invoiceData: Prisma.InvoiceCreateInput = await req.json()
-    const newInvoice = await InvoiceRepository().create({
-      no: 1,
-      companyId: '658db32a6cf334fc362c9cad',
-      partyId: 'cm3ht2ytg000414cz5ea55mwx',
-      taxId: 'cm3ht9fww000514cz33sh7nwz',
-      vehicleNumber: '',
-      date: '2024-02-26T18:30:00.000Z',
-      bankId: '658daf5db7894c3d678c37b3',
-      status: 'CONFIRMED',
-      shouldUseIgst: false
-    })
+    const newInvoice = await InvoiceRepository().create(invoiceData)
 
     return NextResponse.json(newInvoice, { status: 201 })
   } catch (error) {

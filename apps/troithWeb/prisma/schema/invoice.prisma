@@ -1,6 +1,6 @@
 model Invoice {
   id            String        @id @default(cuid())
-  no            BigInt        @unique
+  no            Int           @unique
   vehicleNumber String
   date          DateTime
   status        InvoiceStatus
