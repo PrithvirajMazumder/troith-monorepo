@@ -8,7 +8,23 @@ export const InvoiceRepository = () => {
     },
     findByCompanyId: (companyId: string) => {
       return prisma.invoice.findMany({
-        where: { companyId }
+        where: { companyId },
+        include: {
+          InvoiceItem: {
+            include: {
+              item: {
+                include: {
+                  uom: true,
+                  tax: true
+                }
+              }
+            }
+          },
+          company: true,
+          bank: true,
+          tax: true,
+          party: true
+        }
       })
     }
   }
