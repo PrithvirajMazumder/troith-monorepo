@@ -1,11 +1,11 @@
 import { cn } from '@troith/shared/lib/util'
 import { Badge, H4, Separator } from '@troith/shared'
 import { format } from 'date-fns'
-import { Invoice, InvoiceStatus } from '@troithWeb/__generated__/graphql'
 import Link from 'next/link'
+import { Invoice, InvoiceItem, InvoiceStatus, Party } from '@prisma/client'
 
 type Props = {
-  invoice: Invoice
+  invoice: Invoice & { party: Party; InvoiceItem: (InvoiceItem & { item: any })[] }
 }
 
 export const InvoiceSkeletonLoader = () => {
@@ -30,11 +30,11 @@ export const InvoiceSkeletonLoader = () => {
 export const InvoiceCard = ({ invoice }: Props) => {
   const getInvoiceStatusColor = (status: InvoiceStatus) => {
     switch (status) {
-      case InvoiceStatus.Confirmed:
+      case InvoiceStatus.CONFIRMED:
         return 'blue'
-      case InvoiceStatus.Draft:
+      case InvoiceStatus.DRAFT:
         return 'zinc'
-      case InvoiceStatus.Paid:
+      case InvoiceStatus.PAID:
         return 'green'
       default:
         return 'zinc'
@@ -48,15 +48,15 @@ export const InvoiceCard = ({ invoice }: Props) => {
         'flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all w-full',
         {
           'bg-blue-500/5 dark:border-blue-500/30 dark:bg-blue-800/10 dark:hover:bg-blue-800/20 hover:bg-blue-500/10':
-            invoice.status === InvoiceStatus.Confirmed
+            invoice.status === InvoiceStatus.CONFIRMED
         },
         {
           'bg-orange-500/5 dark:border-orange-500/30 dark:bg-orange-800/10 dark:hover:bg-orange-800/20 hover:bg-orange-500/10':
-            invoice.status === InvoiceStatus.Draft
+            invoice.status === InvoiceStatus.DRAFT
         },
         {
           'bg-green-500/5 dark:border-green-500/30 dark:bg-green-800/10 dark:hover:bg-green-800/20 hover:bg-green-500/10':
-            invoice.status === InvoiceStatus.Paid
+            invoice.status === InvoiceStatus.PAID
         }
       )}
     >
@@ -76,27 +76,28 @@ export const InvoiceCard = ({ invoice }: Props) => {
             </>
           ) : null}
           <Separator orientation="vertical" />
-          <div className="text-xs font-medium">{invoice?.invoiceItems?.length} Items</div>
+          <div className="text-xs font-medium">{invoice?.InvoiceItem?.length} Items</div>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Badge
           variant="outline"
           className={cn(
-            { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.Paid },
-            { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.Draft },
-            { 'bg-blue-100/50 0 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.Confirmed }
+            { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.PAID },
+            { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.DRAFT },
+            { 'bg-blue-100/50 0 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.CONFIRMED }
           )}
         >
           {invoice?.status}
         </Badge>
         <Badge variant="outline">
-          {invoice?.invoiceItems
-            ?.reduce((acc, currentValue) => acc + currentValue?.quantity * currentValue?.price, 0)
-            .toLocaleString('en-IN', {
-              style: 'currency',
-              currency: 'INR'
-            })}
+          {invoice?.InvoiceItem?.reduce(
+            (acc, currentValue) => acc + parseInt(`${currentValue?.quantity}`) * parseInt(`${currentValue?.price}`),
+            0
+          ).toLocaleString('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+          })}
         </Badge>
       </div>
     </Link>

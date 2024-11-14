@@ -1,6 +1,4 @@
 'use client'
-import { useSuspenseQuery } from '@apollo/client'
-import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
 import { InvoiceCard } from '@troithWeb/app/tool/components/invoiceCard'
 import { Plus } from 'lucide-react'
 import { buttonVariants } from '@troith/shared'
@@ -9,13 +7,32 @@ import { cn } from '@troith/shared/lib/util'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
+import { useEffect, useState } from 'react'
+import { Invoice, InvoiceItem, Party } from '@prisma/client'
+import InvoicesProgress from '@troithWeb/app/tool/invoices/(list)/loading'
 
 export default function Invoices() {
   const { selectedCompany } = useCompanyStore()
-  const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.allByCompanyId, {
-    variables: { companyId: selectedCompany?.id ?? '' },
-    fetchPolicy: 'network-only'
-  })
+  const [invoices, setInvoices] = useState<Array<Invoice & { party: Party; InvoiceItem: (InvoiceItem & { item: any })[] }>>([])
+  const [isInvoicesFetching, setIsInvoicesFetching] = useState(true)
+
+  const fetchInvoices = async (companyId: string) => {
+    setIsInvoicesFetching(true)
+    const resp = await fetch(`/api/invoices/${companyId}`)
+    const invoices = await resp.json()
+    setInvoices(invoices)
+    setIsInvoicesFetching(false)
+  }
+
+  useEffect(() => {
+    if (selectedCompany) {
+      void fetchInvoices(selectedCompany.id)
+    }
+  }, [selectedCompany])
+
+  if (isInvoicesFetching) {
+    return <InvoicesProgress />
+  }
 
   return (
     <AnimatePresence>
@@ -27,7 +44,7 @@ export default function Invoices() {
         Create invoice
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
-        {invoiceData?.invoices?.map((invoice) => (
+        {invoices?.map((invoice) => (
           <InvoiceCard invoice={invoice} key={`invoice-list-${invoice?.id}`} />
         ))}
       </motion.div>

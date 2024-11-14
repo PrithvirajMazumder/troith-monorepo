@@ -1,3 +1,4 @@
+'use client'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { Company } from '@prisma/client'
@@ -24,7 +25,7 @@ export const CompanyStoreProvider = ({ children }: PropsWithChildren) => {
 
   const fetchCompanies = async (userId: string) => {
     const resp = await fetch(`/api/companies/${userId}`)
-    const companies: Company[] = (await resp.json())
+    const companies: Company[] = await resp.json()
     setCompanies(companies)
   }
 
