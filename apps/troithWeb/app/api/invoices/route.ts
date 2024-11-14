@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       vehicleNumber: '',
       date: '2024-02-26T18:30:00.000Z',
       bankId: '658daf5db7894c3d678c37b3',
-      status: 'PAID',
+      status: 'CONFIRMED',
       shouldUseIgst: false
     })
 
