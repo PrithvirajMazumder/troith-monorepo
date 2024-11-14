@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       no: 1,
       companyId: '658db32a6cf334fc362c9cad',
       partyId: 'cm3ht2ytg000414cz5ea55mwx',
-      taxId: '658de4371653ad0407d29d7a',
+      taxId: 'cm3ht9fww000514cz33sh7nwz',
       vehicleNumber: '',
       date: '2024-02-26T18:30:00.000Z',
       bankId: '658daf5db7894c3d678c37b3',
