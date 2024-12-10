@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { InvoiceRepository } from '@troithWeb/repositories/invoice.repository'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  const companyId = (await params).slug
+export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+  const companyId = params.slug
   try {
     const invoiceRepository = InvoiceRepository()
     const invoices = await invoiceRepository.findByCompanyId(companyId)

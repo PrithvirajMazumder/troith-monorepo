@@ -21,9 +21,7 @@ import {
 import { CheckCircle, ChevronDown, Download, EllipsisVertical, Gem, Loader, PencilLine, SquareArrowOutUpRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
-import { useMutation, useSuspenseQuery } from '@apollo/client'
-import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
-import { Invoice as InvoiceType, InvoiceStatus } from '@troithWeb/__generated__/graphql'
+import { useMutation } from '@apollo/client'
 import { generateCompleteInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateCompleteInvoice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
@@ -34,20 +32,29 @@ import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoi
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { InvoiceMutations } from '@troithWeb/app/tool/invoices/queries/invoiceMutations'
+import { InvoiceStatus } from '@prisma/client'
+import { InvoiceType } from '@troithWeb/types/invoices'
 
-export default function Invoice({ params: { id: invoiceId } }: { params: { id: string } }) {
-  const { data: invoiceData } = useSuspenseQuery(InvoiceQueries.detailsById, {
-    variables: { invoiceId }
-  })
+export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
+  const [invoice, setInvoice] = useState<InvoiceType | null>(null)
+  const [isInvoiceFetching, setIsInvoiceFetching] = useState(false)
   const [updateInvoiceStatus, { loading: isChangingStatus }] = useMutation(InvoiceMutations.updateInvoiceStatus)
   const [invoiceBase64, setInvoiceBase64] = useState('')
   const pdfContainerRef = useRef<HTMLDivElement>(null)
   const [pdfContainerWidth, setPdfContainerWidth] = useState(0)
   const [isChangeStatusDropdownOpen, setIsChangeStatusDropdownOpen] = useState(false)
 
+  const fetchInvoice = async (invoiceId: string) => {
+    setIsInvoiceFetching(true)
+    const resp = await fetch(`/api/invoices/${invoiceId}`)
+    const invoice = await resp.json()
+    setInvoice(invoice)
+    setIsInvoiceFetching(false)
+  }
+
   useEffect(() => {
-    if (invoiceData?.invoice) {
-      generateCompleteInvoicePdf(invoiceData?.invoice as InvoiceType).getBase64((base64) => {
+    if (invoice) {
+      generateCompleteInvoicePdf(invoice as InvoiceType).getBase64((base64) => {
         setInvoiceBase64(base64)
       })
     }
@@ -76,20 +83,20 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
                   'border border-dashed flex h-7 items-center mr-3 shadow ml-1',
                   {
                     'bg-green-50 dark:bg-green-900 hover:dark:bg-green-900/50 hover:bg-green-50/90 border-green-600':
-                      invoiceData?.invoice?.status === InvoiceStatus.Paid
+                      invoice?.status === InvoiceStatus.PAID
                   },
                   {
                     'bg-orange-50 dark:bg-orange-900 hover:dark:bg-orange-900/50 hover:bg-orange-50/90 border-orange-600':
-                      invoiceData?.invoice?.status === InvoiceStatus.Draft
+                      invoice?.status === InvoiceStatus.DRAFT
                   },
                   {
                     'bg-blue-50 dark:bg-blue-900 hover:dark:bg-blue-900/50 hover:bg-blue-50/90 border-blue-600':
-                      invoiceData?.invoice?.status === InvoiceStatus.Confirmed
+                      invoice?.status === InvoiceStatus.CONFIRMED
                   }
                 )}
               >
                 {isChangingStatus ? <Loader className={cn('w-4 h-4 mr-2 animate-spin')} /> : <CheckCircle className={cn('w-4 h-4 mr-2')} />}
-                {invoiceData?.invoice?.status}
+                {invoice?.status}
                 <ChevronDown className={cn('w-3 h-3 ml-2')} />
               </Button>
             </DropdownMenuTrigger>
@@ -102,26 +109,26 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
                     updateInvoiceStatus({
                       variables: {
                         id: invoiceId,
-                        status: InvoiceStatus.Draft
+                        status: InvoiceStatus.DRAFT
                       }
                     })
                   }
                   className="capitalize"
                 >
-                  <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatus.Draft}
+                  <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatus.DRAFT}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
                     updateInvoiceStatus({
                       variables: {
                         id: invoiceId,
-                        status: InvoiceStatus.Confirmed
+                        status: InvoiceStatus.CONFIRMED
                       }
                     })
                   }
                   className="capitalize"
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatus.Confirmed}
+                  <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatus.CONFIRMED}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="capitalize"
@@ -129,12 +136,12 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
                     updateInvoiceStatus({
                       variables: {
                         id: invoiceId,
-                        status: InvoiceStatus.Paid
+                        status: InvoiceStatus.PAID
                       }
                     })
                   }
                 >
-                  <Gem className="w-4 h-4 mr-2" /> {InvoiceStatus.Paid}
+                  <Gem className="w-4 h-4 mr-2" /> {InvoiceStatus.PAID}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenuPortal>
@@ -142,11 +149,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
           <Separator orientation="vertical" className="mx-2" />
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => invoiceData && generateCompleteInvoicePdf(invoiceData.invoice as InvoiceType).download()}
-              >
+              <Button variant="ghost" size="icon" onClick={() => invoice && generateCompleteInvoicePdf(invoice as InvoiceType).download()}>
                 <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -180,7 +183,7 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
         </header>
         <ScrollArea ref={pdfContainerRef} className="h-full w-full max-w-full p-4 bg-gray-50 dark:bg-zinc-900 pb-[2rem]">
           <div className="w-full relative">
-            {invoiceData?.invoice?.status === InvoiceStatus.Paid ? (
+            {invoice?.status === InvoiceStatus.PAID ? (
               <motion.div
                 transition={{
                   delay: 0.7,
@@ -395,3 +398,4 @@ export default function Invoice({ params: { id: invoiceId } }: { params: { id: s
     </>
   )
 }
+

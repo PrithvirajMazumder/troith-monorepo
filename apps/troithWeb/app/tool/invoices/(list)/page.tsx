@@ -18,7 +18,7 @@ export default function Invoices() {
 
   const fetchInvoices = async (companyId: string) => {
     setIsInvoicesFetching(true)
-    const resp = await fetch(`/api/invoices/${companyId}`)
+    const resp = await fetch(`/api/invoices/company/${companyId}`)
     const invoices = await resp.json()
     setInvoices(invoices)
     setIsInvoicesFetching(false)
