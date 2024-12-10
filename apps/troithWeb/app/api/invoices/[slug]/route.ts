@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { InvoiceRepository } from '@troithWeb/repositories/invoice.repository'
-import { InvoiceItem, Prisma } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
