@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { InvoiceRepository } from '@troithWeb/repositories/invoice.repository'
+import { InvoiceItem, Prisma } from '@prisma/client'
+import { InvoiceType } from '@troithWeb/types/invoices'
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
   const invoiceId = params.slug
@@ -26,9 +28,11 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const invoiceId = (await params).slug
+  const reqBody: InvoiceType = await request.json()
+  const {no, id, ...invoiceData} = reqBody
   try {
     const invoiceRepository = InvoiceRepository()
-    const invoice = await invoiceRepository.findById(invoiceId)
+    const invoice = await invoiceRepository.update(invoiceData, invoiceId)
 
     return NextResponse.json(
       {

@@ -40,7 +40,7 @@ export default function Invoices() {
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
         {invoices?.map((invoice) => (
-          <InvoiceCard invoice={invoice} key={`invoice-list-${invoice?.id}`} />
+          <InvoiceCard invoice={invoice} key={`invoice-list-${invoice?.id}-${invoice?.status}`} />
         ))}
       </motion.div>
     </AnimatePresence>

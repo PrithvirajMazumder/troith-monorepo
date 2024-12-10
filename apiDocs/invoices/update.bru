@@ -1,0 +1,17 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{BaseURL}}/api/invoices/cm3huwuzo000l13jwhcjlxcsq
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "status": "DRAFT"
+  }
+}

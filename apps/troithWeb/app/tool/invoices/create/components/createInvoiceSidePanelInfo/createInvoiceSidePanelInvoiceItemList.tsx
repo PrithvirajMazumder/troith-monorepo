@@ -1,8 +1,13 @@
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { InvoiceItemType } from '@troithWeb/types/invoices'
+import { useEffect } from 'react'
 
-export const CreateInvoiceSidePanelInvoiceItemList = ({ invoiceItem }: { invoiceItem: InvoiceItemType }) => (
-  <div className="mb-2 w-full">
+export const CreateInvoiceSidePanelInvoiceItemList = ({ invoiceItem }: { invoiceItem: InvoiceItemType }) => {
+  useEffect(() => {
+    console.log('invoiceItem.id: ', invoiceItem.id)
+  }, [])
+
+  return <div className="mb-2 w-full">
     <p className="font-semibold capitalize">{invoiceItem?.item?.name}</p>
     <div className="flex justify-between items-center flex-wrap w-full">
       <p className="text-sm text-muted-foreground italic capitalize">
@@ -14,4 +19,4 @@ export const CreateInvoiceSidePanelInvoiceItemList = ({ invoiceItem }: { invoice
       </p>
     </div>
   </div>
-)
+}

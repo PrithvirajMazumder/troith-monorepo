@@ -21,7 +21,6 @@ import {
 import { CheckCircle, ChevronDown, Download, EllipsisVertical, Gem, Loader, PencilLine, SquareArrowOutUpRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@troith/shared/lib/util'
-import { useMutation } from '@apollo/client'
 import { generateCompleteInvoicePdf } from '@troithWeb/app/tool/invoices/utils/generateCompleteInvoice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
@@ -31,23 +30,41 @@ import { format } from 'date-fns'
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
-import { InvoiceMutations } from '@troithWeb/app/tool/invoices/queries/invoiceMutations'
 import { InvoiceStatus } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
-import { log } from 'next/dist/server/typescript/utils'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 
 const fetchInvoice = async (invoiceId: string): Promise<InvoiceType> => {
   return await (await fetch(`/api/invoices/${invoiceId}`)).json()
 }
 
+const updateStatus = async ({ invoiceStatus, invoiceId }: { invoiceId: string; invoiceStatus: InvoiceStatus }): Promise<InvoiceType> => {
+  return await (
+    await fetch(`/api/invoices/${invoiceId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: invoiceStatus })
+    })
+  ).json()
+}
+
 export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
+  const queryClient = useQueryClient()
+  const {selectedCompany} = useCompanyStore()
   const { data: invoice } = useSuspenseQuery({
     queryKey: invoicesKeys.detail(invoiceId),
     queryFn: () => fetchInvoice(invoiceId)
   })
-  const [updateInvoiceStatus, { loading: isChangingStatus }] = useMutation(InvoiceMutations.updateInvoiceStatus)
+  const updateInvoiceStatusMutation = useMutation({
+    mutationFn: (...params: [...Parameters<typeof updateStatus>]) => updateStatus(...params),
+    onSuccess: async (updatedInvoice) => {
+      void queryClient.invalidateQueries({
+        queryKey: invoicesKeys.lists(selectedCompany?.id ?? '')
+      })
+      queryClient.setQueryData(invoicesKeys.detail(invoiceId), () => updatedInvoice)
+    }
+  })
   const [invoiceBase64, setInvoiceBase64] = useState('')
   const pdfContainerRef = useRef<HTMLDivElement>(null)
   const [pdfContainerWidth, setPdfContainerWidth] = useState(0)
@@ -80,7 +97,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                disabled={isChangingStatus}
+                disabled={updateInvoiceStatusMutation.isPending}
                 onClick={() => setIsChangeStatusDropdownOpen(!isChangeStatusDropdownOpen)}
                 variant="ghost"
                 className={cn(
@@ -99,7 +116,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                   }
                 )}
               >
-                {isChangingStatus ? <Loader className={cn('w-4 h-4 mr-2 animate-spin')} /> : <CheckCircle className={cn('w-4 h-4 mr-2')} />}
+                {updateInvoiceStatusMutation.isPending ? <Loader className={cn('w-4 h-4 mr-2 animate-spin')} /> : <CheckCircle className={cn('w-4 h-4 mr-2')} />}
                 {invoice?.status}
                 <ChevronDown className={cn('w-3 h-3 ml-2')} />
               </Button>
@@ -108,13 +125,37 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               <DropdownMenuContent className="z-[999]">
                 <DropdownMenuLabel>Change status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => log('ehllo')} className="capitalize">
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateInvoiceStatusMutation.mutate({
+                      invoiceId,
+                      invoiceStatus: InvoiceStatus.DRAFT
+                    })
+                  }
+                  className="capitalize"
+                >
                   <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatus.DRAFT}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => log('ehllo')} className="capitalize">
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateInvoiceStatusMutation.mutate({
+                      invoiceId,
+                      invoiceStatus: InvoiceStatus.CONFIRMED
+                    })
+                  }
+                  className="capitalize"
+                >
                   <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatus.CONFIRMED}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="capitalize" onClick={() => log('ehllo')}>
+                <DropdownMenuItem
+                  className="capitalize"
+                  onClick={() =>
+                    updateInvoiceStatusMutation.mutate({
+                      invoiceId,
+                      invoiceStatus: InvoiceStatus.PAID
+                    })
+                  }
+                >
                   <Gem className="w-4 h-4 mr-2" /> {InvoiceStatus.PAID}
                 </DropdownMenuItem>
               </DropdownMenuContent>

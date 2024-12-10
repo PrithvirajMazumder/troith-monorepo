@@ -10,4 +10,4 @@ export type InvoiceType = Invoice & {
 
 export type InvoiceItemType = InvoiceItem & { item: Item; uom: Uom }
 
-export type UpdateInvoice = Partial<Omit<Invoice, 'id'>>
+export type UpdateInvoice = Partial<Omit<Invoice, 'id' | 'no'>>
