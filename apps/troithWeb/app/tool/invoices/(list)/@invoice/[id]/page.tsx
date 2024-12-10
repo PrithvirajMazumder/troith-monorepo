@@ -34,6 +34,7 @@ import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { InvoiceMutations } from '@troithWeb/app/tool/invoices/queries/invoiceMutations'
 import { InvoiceStatus } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
+import { log } from 'next/dist/server/typescript/utils'
 
 export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
   const [invoice, setInvoice] = useState<InvoiceType | null>(null)
@@ -44,25 +45,27 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
   const [pdfContainerWidth, setPdfContainerWidth] = useState(0)
   const [isChangeStatusDropdownOpen, setIsChangeStatusDropdownOpen] = useState(false)
 
+  const handleResize = () => setPdfContainerWidth(pdfContainerRef?.current?.offsetWidth ?? 0)
+
   const fetchInvoice = async (invoiceId: string) => {
     setIsInvoiceFetching(true)
     const resp = await fetch(`/api/invoices/${invoiceId}`)
-    const invoice = await resp.json()
+    const invoice = (await resp.json()) as InvoiceType
     setInvoice(invoice)
     setIsInvoiceFetching(false)
-  }
-
-  useEffect(() => {
     if (invoice) {
       generateCompleteInvoicePdf(invoice as InvoiceType).getBase64((base64) => {
         setInvoiceBase64(base64)
       })
     }
-    const handleResize = () => setPdfContainerWidth(pdfContainerRef?.current?.offsetWidth ?? 0)
+
     handleResize()
     window.addEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
     window.addEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
+  }
 
+  useEffect(() => {
+    void fetchInvoice(invoiceId)
     return () => {
       window.removeEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
       window.removeEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
@@ -104,43 +107,13 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               <DropdownMenuContent className="z-[999]">
                 <DropdownMenuLabel>Change status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateInvoiceStatus({
-                      variables: {
-                        id: invoiceId,
-                        status: InvoiceStatus.DRAFT
-                      }
-                    })
-                  }
-                  className="capitalize"
-                >
+                <DropdownMenuItem onClick={() => log('ehllo')} className="capitalize">
                   <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatus.DRAFT}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateInvoiceStatus({
-                      variables: {
-                        id: invoiceId,
-                        status: InvoiceStatus.CONFIRMED
-                      }
-                    })
-                  }
-                  className="capitalize"
-                >
+                <DropdownMenuItem onClick={() => log('ehllo')} className="capitalize">
                   <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatus.CONFIRMED}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="capitalize"
-                  onClick={() =>
-                    updateInvoiceStatus({
-                      variables: {
-                        id: invoiceId,
-                        status: InvoiceStatus.PAID
-                      }
-                    })
-                  }
-                >
+                <DropdownMenuItem className="capitalize" onClick={() => log('ehllo')}>
                   <Gem className="w-4 h-4 mr-2" /> {InvoiceStatus.PAID}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -204,7 +177,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 className="absolute -rotate-12 top-1/2 left-1/2 z-50 border-green-600 dark:border-green-200 border-8 text-green-600 dark:text-green-400 rounded-xl p-1 font-extrabold"
               >
                 <div className="w-full h-full flex justify-center items-center border-2 border-green-600 dark:border-green-200 rounded-lg py-4 px-6">
-                  <p className="text-3xl uppercase">{invoiceData?.invoice?.status}</p>
+                  <p className="text-3xl uppercase">{invoice?.status}</p>
                 </div>
               </motion.div>
             ) : null}
@@ -213,22 +186,20 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               {...animateBasicMotionOpacity()}
               className="p-4 border rounded-t-lg bg-background border-dashed relative"
             >
-              <p className="text-lg font-semibold capitalize">Invoice No: {invoiceData?.invoice?.no}</p>
+              <p className="text-lg font-semibold capitalize">Invoice No: {invoice?.no}</p>
               <div className="w-full flex flex-col">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Status:</p>
-                  <p className="text-sm text-muted-foreground italic font-semibold">{invoiceData?.invoice?.status}</p>
+                  <p className="text-sm text-muted-foreground italic font-semibold">{invoice?.status}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Date:</p>
-                  <p className="text-sm text-muted-foreground italic font-semibold">
-                    {format(invoiceData?.invoice?.date ?? new Date(), 'dd/MM/yyyy')}
-                  </p>
+                  <p className="text-sm text-muted-foreground italic font-semibold">{format(invoice?.date ?? new Date(), 'dd/MM/yyyy')}</p>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-sm text-muted-foreground">Vehicle no:</p>
                   <p className="text-sm text-muted-foreground italic font-semibold capitalize">
-                    {invoiceData?.invoice?.vehicleNumber?.length ? invoiceData?.invoice?.vehicleNumber : 'N/A'}
+                    {invoice?.vehicleNumber?.length ? invoice?.vehicleNumber : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -251,9 +222,9 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 <SquareArrowOutUpRight className="w-4 h-4 text-muted-foreground" />
               </Link>
               <p className="text-[12px] underline decoration-dashed text-muted-foreground">Company</p>
-              <p className="text-lg font-semibold capitalize">{invoiceData?.invoice?.company?.legalName}</p>
-              <p className="text-sm text-muted-foreground italic">GSTIN: {invoiceData?.invoice?.company?.gstin}</p>
-              <p className="text-sm text-muted-foreground italic capitalize">State: {invoiceData?.invoice?.company?.state}</p>
+              <p className="text-lg font-semibold capitalize">{invoice?.company?.legalName}</p>
+              <p className="text-sm text-muted-foreground italic">GSTIN: {invoice?.company?.gstin}</p>
+              <p className="text-sm text-muted-foreground italic capitalize">State: {invoice?.company?.state}</p>
             </motion.div>
             <motion.div
               transition={{ duration: 0.2, delay: 0.2 }}
@@ -273,8 +244,8 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 <SquareArrowOutUpRight className="w-4 h-4 text-muted-foreground" />
               </Link>
               <p className="text-[12px] underline decoration-dashed text-muted-foreground">Party</p>
-              <p className="text-lg font-semibold capitalize">{invoiceData?.invoice?.party?.name}</p>
-              <p className="text-sm text-muted-foreground italic">GSTIN: {invoiceData?.invoice?.party?.gstin}</p>
+              <p className="text-lg font-semibold capitalize">{invoice?.party?.name}</p>
+              <p className="text-sm text-muted-foreground italic">GSTIN: {invoice?.party?.gstin}</p>
             </motion.div>
             <motion.div
               transition={{ duration: 0.2, delay: 0.3 }}
@@ -282,15 +253,8 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               className="p-4 border border-t-0 bg-background border-dashed relative"
             >
               <p className="text-[12px] underline decoration-dashed text-muted-foreground">Items</p>
-              {invoiceData?.invoice?.invoiceItems.map((invoiceItem) => (
-                <CreateInvoiceSidePanelInvoiceItemList
-                  key={`sneak-peak-invoice-item-${invoiceItem?.item?.id}`}
-                  invoiceItem={{
-                    item: invoiceItem?.item,
-                    price: invoiceItem?.price,
-                    quantity: invoiceItem?.quantity
-                  }}
-                />
+              {invoice?.InvoiceItem.map((invoiceItem) => (
+                <CreateInvoiceSidePanelInvoiceItemList key={`sneak-peak-invoice-item-${invoiceItem?.item?.id}`} invoiceItem={invoiceItem} />
               ))}
             </motion.div>
             <motion.div
@@ -300,41 +264,41 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
             >
               <p className="text-[12px] underline decoration-dashed text-muted-foreground">Totals</p>
               {(() => {
-                const { cgst, grossTotal, netTotal, sgst } = getInvoiceTotals({
-                  invoiceItems: invoiceData?.invoice?.invoiceItems ?? [],
-                  tax: invoiceData?.invoice?.tax
-                })
-                return (
-                  <>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-muted-foreground">Gross:</p>
-                      <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(grossTotal)}</p>
-                    </div>
-                    {invoiceData?.invoice?.shouldUseIgst ? (
+                if (invoice?.tax) {
+                  const { cgst, grossTotal, netTotal, sgst } = getInvoiceTotals({
+                    InvoiceItem: invoice?.InvoiceItem ?? [],
+                    tax: invoice?.tax
+                  })
+                  return (
+                    <>
                       <div className="flex justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          IGST({(invoiceData?.invoice?.tax?.cgst ?? 0) + (invoiceData?.invoice?.tax?.sgst ?? 0)}%):
-                        </p>
-                        <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst + sgst)}</p>
+                        <p className="text-sm text-muted-foreground">Gross:</p>
+                        <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(grossTotal)}</p>
                       </div>
-                    ) : (
-                      <>
+                      {invoice?.shouldUseIgst ? (
                         <div className="flex justify-between">
-                          <p className="text-sm text-muted-foreground">CGST({invoiceData?.invoice?.tax?.cgst}%):</p>
-                          <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst)}</p>
+                          <p className="text-sm text-muted-foreground">IGST({(invoice?.tax?.cgst ?? 0) + (invoice?.tax?.sgst ?? 0)}%):</p>
+                          <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst + sgst)}</p>
                         </div>
-                        <div className="flex justify-between">
-                          <p className="text-sm text-muted-foreground">SGST({invoiceData?.invoice?.tax?.sgst}%):</p>
-                          <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(sgst)}</p>
-                        </div>
-                      </>
-                    )}
-                    <div className="flex justify-between">
-                      <p className="text-sm text-muted-foreground">Net:</p>
-                      <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(netTotal)}</p>
-                    </div>
-                  </>
-                )
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">CGST({invoice?.tax?.cgst}%):</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(cgst)}</p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="text-sm text-muted-foreground">SGST({invoice?.tax?.sgst}%):</p>
+                            <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(sgst)}</p>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex justify-between">
+                        <p className="text-sm text-muted-foreground">Net:</p>
+                        <p className="text-sm text-muted-foreground italic font-semibold">{convertAmountToInr(netTotal)}</p>
+                      </div>
+                    </>
+                  )
+                }
               })()}
             </motion.div>
             <motion.div
@@ -355,10 +319,10 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 <SquareArrowOutUpRight className="w-4 h-4 text-muted-foreground" />
               </Link>
               <p className="text-[12px] underline decoration-dashed text-muted-foreground">Bank</p>
-              <p className="text-lg font-semibold capitalize">{invoiceData?.invoice?.bank?.name}</p>
-              <p className="text-sm text-muted-foreground italic">Account No: {invoiceData?.invoice?.bank?.accountNumber}</p>
-              <p className="text-sm text-muted-foreground italic uppercase">IFSC: {invoiceData?.invoice?.bank?.ifsc}</p>
-              <p className="text-sm text-muted-foreground italic capitalize">Branch: {invoiceData?.invoice?.bank?.branch}</p>
+              <p className="text-lg font-semibold capitalize">{invoice?.bank?.name}</p>
+              <p className="text-sm text-muted-foreground italic">Account No: {invoice?.bank?.accountNumber}</p>
+              <p className="text-sm text-muted-foreground italic uppercase">IFSC: {invoice?.bank?.ifsc}</p>
+              <p className="text-sm text-muted-foreground italic capitalize">Branch: {invoice?.bank?.branch}</p>
             </motion.div>
           </div>
           <motion.div
@@ -377,7 +341,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               height: (pdfContainerWidth - 70) * 1.414
             }}
           >
-            {invoiceData?.invoice ? (
+            {invoice ? (
               <motion.div
                 transition={{
                   delay: 0.6
@@ -398,4 +362,3 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
     </>
   )
 }
-

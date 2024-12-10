@@ -6,6 +6,7 @@ import { capitalize } from '@troithWeb/utils/string'
 import { format } from 'date-fns'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { getDecimalPart } from '@troithWeb/utils/number'
+import { InvoiceItemType, InvoiceType } from '@troithWeb/types/invoices'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
@@ -19,26 +20,26 @@ export const InvoiceFontSizes = {
   SmallFontSize: 8
 }
 
-export function getGrossTotalValueFromInvoiceItems(invoiceItems: InvoiceItem[]) {
-  return invoiceItems?.reduce((acc, curr) => acc + curr.price * curr.quantity, 0)
+export function getGrossTotalValueFromInvoiceItems(invoiceItems: InvoiceItemType[]) {
+  return invoiceItems?.reduce((acc, curr) => acc + parseInt(`${curr.price}`) * parseInt(`${curr.quantity}`), 0)
 }
 
-export const generateCompleteInvoicePdf = (invoice: Invoice) => {
-  const grossTotal = getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems)
-  const sgst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * (invoice?.tax?.sgst ?? 0)) / 100
-  const cgst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * (invoice?.tax?.cgst ?? 0)) / 100
-  const igst = (getGrossTotalValueFromInvoiceItems(invoice?.invoiceItems ?? []) * ((invoice?.tax?.cgst ?? 0) + (invoice?.tax?.sgst ?? 0))) / 100
+export const generateCompleteInvoicePdf = (invoice: InvoiceType) => {
+  const grossTotal = getGrossTotalValueFromInvoiceItems(invoice?.InvoiceItem)
+  const sgst = (getGrossTotalValueFromInvoiceItems(invoice?.InvoiceItem ?? []) * (invoice?.tax?.sgst ?? 0)) / 100
+  const cgst = (getGrossTotalValueFromInvoiceItems(invoice?.InvoiceItem ?? []) * (invoice?.tax?.cgst ?? 0)) / 100
+  const igst = (getGrossTotalValueFromInvoiceItems(invoice?.InvoiceItem ?? []) * ((invoice?.tax?.cgst ?? 0) + (invoice?.tax?.sgst ?? 0))) / 100
   const roundOff = parseInt(`0.${getDecimalPart(grossTotal + cgst + sgst)}`).toFixed(2)
   const netTotal = Math.floor(grossTotal + cgst + sgst)
 
   const items =
-    invoice?.invoiceItems?.map((invoiceItem, index) => [
+    invoice?.InvoiceItem?.map((invoiceItem, index) => [
       index + 1,
       invoiceItem?.item?.name ?? '',
       invoiceItem?.item?.hsn ?? '',
-      `${invoiceItem?.quantity} ${invoiceItem?.item?.uom?.abbreviation}`,
+      `${invoiceItem?.quantity} ${invoiceItem?.uom?.abbreviation}`,
       {
-        text: `${convertAmountToInr(invoiceItem?.price, false)}`,
+        text: `${convertAmountToInr(parseInt(`${invoiceItem?.price}`), false)}`,
         alignment: 'right'
       }
     ]) ?? []
@@ -122,7 +123,7 @@ export const generateCompleteInvoicePdf = (invoice: Invoice) => {
                 colSpan: 2
               },
               '',
-              `Date: ${invoice?.date?.length ? format(invoice?.date, 'dd/MM/yyyy') : ''}`,
+              `Date: ${invoice?.date ? format(invoice?.date, 'dd/MM/yyyy') : ''}`,
               `GSTIN: ${invoice?.party?.gstin}`
             ]
           ]
