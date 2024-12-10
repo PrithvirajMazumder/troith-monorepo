@@ -7,32 +7,27 @@ import { cn } from '@troith/shared/lib/util'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { useEffect, useState } from 'react'
-import { Invoice, InvoiceItem, Party } from '@prisma/client'
-import InvoicesProgress from '@troithWeb/app/tool/invoices/(list)/loading'
+import { useEffect } from 'react'
+import { InvoiceType } from '@troithWeb/types/invoices'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
+
+const fetchInvoices = async (companyId: string): Promise<Array<InvoiceType>> => {
+  return await (await fetch(`/api/invoices/company/${companyId}`)).json()
+}
 
 export default function Invoices() {
   const { selectedCompany } = useCompanyStore()
-  const [invoices, setInvoices] = useState<Array<Invoice & { party: Party; InvoiceItem: (InvoiceItem & { item: any })[] }>>([])
-  const [isInvoicesFetching, setIsInvoicesFetching] = useState(true)
-
-  const fetchInvoices = async (companyId: string) => {
-    setIsInvoicesFetching(true)
-    const resp = await fetch(`/api/invoices/company/${companyId}`)
-    const invoices = await resp.json()
-    setInvoices(invoices)
-    setIsInvoicesFetching(false)
-  }
+  const { data: invoices } = useSuspenseQuery({
+    queryKey: invoicesKeys?.lists(selectedCompany?.id ?? ''),
+    queryFn: () => fetchInvoices(selectedCompany?.id ?? '')
+  })
 
   useEffect(() => {
     if (selectedCompany) {
       void fetchInvoices(selectedCompany.id)
     }
   }, [selectedCompany])
-
-  if (isInvoicesFetching) {
-    return <InvoicesProgress />
-  }
 
   return (
     <AnimatePresence>

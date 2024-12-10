@@ -35,10 +35,18 @@ import { InvoiceMutations } from '@troithWeb/app/tool/invoices/queries/invoiceMu
 import { InvoiceStatus } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
 import { log } from 'next/dist/server/typescript/utils'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
+
+const fetchInvoice = async (invoiceId: string): Promise<InvoiceType> => {
+  return await (await fetch(`/api/invoices/${invoiceId}`)).json()
+}
 
 export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
-  const [invoice, setInvoice] = useState<InvoiceType | null>(null)
-  const [isInvoiceFetching, setIsInvoiceFetching] = useState(false)
+  const { data: invoice } = useSuspenseQuery({
+    queryKey: invoicesKeys.detail(invoiceId),
+    queryFn: () => fetchInvoice(invoiceId)
+  })
   const [updateInvoiceStatus, { loading: isChangingStatus }] = useMutation(InvoiceMutations.updateInvoiceStatus)
   const [invoiceBase64, setInvoiceBase64] = useState('')
   const pdfContainerRef = useRef<HTMLDivElement>(null)
@@ -47,30 +55,23 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
 
   const handleResize = () => setPdfContainerWidth(pdfContainerRef?.current?.offsetWidth ?? 0)
 
-  const fetchInvoice = async (invoiceId: string) => {
-    setIsInvoiceFetching(true)
-    const resp = await fetch(`/api/invoices/${invoiceId}`)
-    const invoice = (await resp.json()) as InvoiceType
-    setInvoice(invoice)
-    setIsInvoiceFetching(false)
+  useEffect(() => {
     if (invoice) {
       generateCompleteInvoicePdf(invoice as InvoiceType).getBase64((base64) => {
         setInvoiceBase64(base64)
       })
+
+      handleResize()
+      window.addEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
+      window.addEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
+      void fetchInvoice(invoiceId)
     }
 
-    handleResize()
-    window.addEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
-    window.addEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
-  }
-
-  useEffect(() => {
-    void fetchInvoice(invoiceId)
     return () => {
       window.removeEventListener(CustomEventsNames.InvoiceSidePanelResizeEventName, handleResize)
       window.removeEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
     }
-  }, [])
+  }, [invoice])
 
   return (
     <>

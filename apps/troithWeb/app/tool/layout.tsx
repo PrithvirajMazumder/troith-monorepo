@@ -46,6 +46,7 @@ import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNam
 import { signOut } from '@troithWeb/auth'
 import { SessionProvider } from 'next-auth/react'
 import { Company } from '@prisma/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const ToolLayout = ({ children }: PropsWithChildren) => {
   const { selectedCompany, companies, setSelectedCompany, isSelectCompanyModalOpen, toggleSelectCompanyModal } = useCompanyStore()
@@ -247,16 +248,20 @@ const ToolLayout = ({ children }: PropsWithChildren) => {
 }
 
 const Providers = ({ children }: PropsWithChildren) => {
+  const queryClient = new QueryClient()
+
   return (
-    <SessionProvider>
-      <ApolloWrapper>
-        <CompanyStoreProvider>
-          <TooltipProvider>
-            <ToolLayout>{children}</ToolLayout>
-          </TooltipProvider>
-        </CompanyStoreProvider>
-      </ApolloWrapper>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider>
+        <ApolloWrapper>
+          <CompanyStoreProvider>
+            <TooltipProvider>
+              <ToolLayout>{children}</ToolLayout>
+            </TooltipProvider>
+          </CompanyStoreProvider>
+        </ApolloWrapper>
+      </SessionProvider>
+    </QueryClientProvider>
   )
 }
 
