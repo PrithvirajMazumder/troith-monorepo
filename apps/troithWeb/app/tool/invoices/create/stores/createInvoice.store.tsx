@@ -1,7 +1,8 @@
 'use client'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
-import { Bank, Invoice, InvoiceItem, Item, Party, Tax } from '@troithWeb/__generated__/graphql'
+import { Bank, Invoice, InvoiceItem, Party, Tax } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next-nprogress-bar'
+import { ItemType } from '@troithWeb/types/items'
 
 type FinalInvoicePayload = { date: string; invoiceNumber: number; vehicleNumber?: string; bank: Bank; tax: Tax }
 type CreateInvoiceContextProps = {
@@ -9,8 +10,8 @@ type CreateInvoiceContextProps = {
   setSelectedParty: Dispatch<SetStateAction<Party | null>>
   selectedTax: Tax | null
   setSelectedTax: Dispatch<SetStateAction<Tax | null>>
-  selectedItems: Item[]
-  setSelectedItems: Dispatch<SetStateAction<Item[]>>
+  selectedItems: ItemType[]
+  setSelectedItems: Dispatch<SetStateAction<ItemType[]>>
   invoiceItems: InvoiceItem[]
   setInvoiceItems: Dispatch<SetStateAction<InvoiceItem[]>>
   selectedBank: Bank | null
@@ -30,7 +31,7 @@ const CreateInvoiceContext = createContext<CreateInvoiceContextProps>({} as Crea
 
 export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   const [selectedParty, setSelectedParty] = useState<Party | null>(null)
-  const [selectedItems, setSelectedItems] = useState<Item[]>([])
+  const [selectedItems, setSelectedItems] = useState<ItemType[]>([])
   const [selectedTax, setSelectedTax] = useState<Tax | null>(null)
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null)

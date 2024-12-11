@@ -1,8 +1,5 @@
 'use client'
-import { useSuspenseQuery } from '@apollo/client'
-import { ItemQueries } from '@troithWeb/app/tool/items/queries/itemQueries'
 import { ItemCard } from '@troithWeb/app/tool/components/itemCard'
-import { Item } from '@troithWeb/__generated__/graphql'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from '@troith/shared'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { cn } from '@troith/shared/lib/util'
@@ -13,21 +10,27 @@ import { useRouter } from 'next-nprogress-bar'
 import { motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { itemsKeys } from '@troithWeb/app/tool/queryKeys/items'
+import { ItemType } from '@troithWeb/types/items'
 
-type ItemsMap = { [key: string]: Item }
+type ItemsMap = { [key: string]: ItemType }
+
+const fetchItems = async (companyId: string): Promise<Array<ItemType>> => await (await fetch(`/api/items/company/${companyId}`)).json()
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'
   const { selectedCompany } = useCompanyStore()
   const { selectedItems: previouslySelectedItems, selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
-  const [selectedItems, setSelectedItems] = useState<Item[]>(previouslySelectedItems)
+  const [selectedItems, setSelectedItems] = useState<ItemType[]>(previouslySelectedItems)
   const [selectedItemsMap, setSelectedItemsMap] = useState<ItemsMap>({} as ItemsMap)
-  const { data: itemsData } = useSuspenseQuery(ItemQueries.all, {
-    variables: { companyId: selectedCompany?.id ?? '' }
+  const { data: items } = useSuspenseQuery({
+    queryKey: itemsKeys.lists(selectedCompany?.id ?? ''),
+    queryFn: () => fetchItems(selectedCompany?.id ?? '')
   })
   const router = useRouter()
 
-  const handleItemSelection = (item: Item) => {
+  const handleItemSelection = (item: ItemType) => {
     const filteredSelectedItemsWithoutExistingItem = selectedItems.filter((selectedItem) => selectedItem?.id !== item?.id)
     if (filteredSelectedItemsWithoutExistingItem?.length !== selectedItems?.length) {
       return setSelectedItems([...filteredSelectedItemsWithoutExistingItem])
@@ -54,20 +57,20 @@ export default function SelectItemsCreateInvoicePage() {
           <AccordionItem defaultChecked value={AccordionId}>
             <AccordionTrigger>Party Items</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-3">
-              {itemsData?.items
+              {items
                 ?.filter((item) => selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
                 ?.map((item) => (
-                  <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item as Item} key={item?.id} onSelect={handleItemSelection} />
+                  <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item} key={item?.id} onSelect={handleItemSelection} />
                 ))}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       ) : null}
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col gap-3 mt-4">
-        {itemsData?.items
+        {items
           ?.filter((item) => !selectedParty?.partyItemIds?.find((partyItemId) => partyItemId === item?.id))
           ?.map((item) => (
-            <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item as Item} key={item?.id} onSelect={handleItemSelection} />
+            <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item} key={item?.id} onSelect={handleItemSelection} />
           ))}
       </motion.div>
       <Button

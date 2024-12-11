@@ -1,9 +1,9 @@
-import { Item } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
 import React from 'react'
 import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
+import { ItemType } from '@troithWeb/types/items'
 
 export const ItemCardSkeletonLoader = () => {
   return (
@@ -18,7 +18,7 @@ export const ItemCardSkeletonLoader = () => {
   )
 }
 
-export const ItemCard = ({ onSelect, isSelected = false, entity: item }: EntityCardProps<Item>) => {
+export const ItemCard = ({ onSelect, isSelected = false, entity: item }: EntityCardProps<ItemType>) => {
   return (
     <div
       onClick={() => onSelect(item)}
