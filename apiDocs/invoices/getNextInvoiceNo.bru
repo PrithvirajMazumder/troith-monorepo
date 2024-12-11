@@ -1,0 +1,15 @@
+meta {
+  name: getNextInvoiceNo
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{BaseURL}}/api/invoices?no=8
+  body: none
+  auth: none
+}
+
+params:query {
+  no: 8
+}

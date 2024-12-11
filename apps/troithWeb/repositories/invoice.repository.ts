@@ -7,6 +7,18 @@ export const InvoiceRepository = () => {
     create: (invoice: Prisma.Args<typeof prisma.invoice, 'create'>['data']) => {
       return prisma.invoice.create({ data: invoice })
     },
+    findNextInvoiceNo: async () => {
+      const latestInvoice = await prisma.invoice.findFirst({
+        orderBy: {
+          no: 'desc'
+        },
+        select: {
+          no: true
+        }
+      })
+
+      return (latestInvoice?.no || 0) + 1
+    },
     findByCompanyId: (companyId: string) => {
       return prisma.invoice.findMany({
         where: { companyId },
@@ -54,6 +66,29 @@ export const InvoiceRepository = () => {
         }
       })
     },
+    findByNo: (no: number) => {
+      return prisma.invoice.findUnique({
+        where: {
+          no: no
+        },
+        include: {
+          InvoiceItem: {
+            include: {
+              item: {
+                include: {
+                  uom: true,
+                  tax: true
+                }
+              }
+            }
+          },
+          company: true,
+          bank: true,
+          tax: true,
+          party: true
+        }
+      })
+    },
     update: (newInvoiceData: UpdateInvoice, invoiceId: string) => {
       return prisma.invoice.update({
         where: {
@@ -78,7 +113,6 @@ export const InvoiceRepository = () => {
           tax: true,
           party: true
         }
-
       })
     }
   }
