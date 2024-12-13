@@ -56,7 +56,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
     queryKey: invoicesKeys.detail(invoiceId),
     queryFn: () => fetchInvoice(invoiceId)
   })
-  const updateInvoiceStatusMutatzion = useMutation({
+  const updateInvoiceStatusMutation = useMutation({
     mutationFn: (...params: [...Parameters<typeof updateStatus>]) => updateStatus(...params),
     onSuccess: async (updatedInvoice) => {
       void queryClient.invalidateQueries({

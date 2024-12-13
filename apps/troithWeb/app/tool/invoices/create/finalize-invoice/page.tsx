@@ -28,12 +28,9 @@ import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from '
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
 import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
-import { Invoice } from '@troithWeb/__generated__/graphql'
 import { format } from 'date-fns'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
-import { useToast } from '@troith/shared/hooks/use-toast'
-import { useRouter } from 'next-nprogress-bar'
 import { usePathname } from 'next/navigation'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { taxesKeys } from '@troithWeb/app/tool/queryKeys/taxes'
@@ -46,12 +43,10 @@ import { useSession } from 'next-auth/react'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
-  const { data: session } = useSession()
   const pathname = usePathname()
+  const { data: session } = useSession()
   const { selectedCompany } = useCompanyStore()
-  const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
-  const router = useRouter()
-  const { toast } = useToast()
+  const { setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const { createInvoice } = useFinalizeInvoice()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: taxationData } = useSuspenseQuery({
@@ -111,10 +106,6 @@ export default function AddMisc() {
     }
   }, [debouncedInvoiceNumber])
 
-  useEffect(() => {
-    setIsSubmitting(false)
-  }, [pathname])
-
   const validateInvoiceNumber = (invoiceNumberData: InvoiceType | null | undefined): boolean => {
     if (invoiceNumberData) {
       setError('invoiceNumber', {
@@ -131,6 +122,10 @@ export default function AddMisc() {
     validateInvoiceNumber(invoiceNumberData)
   }, [invoiceNumberData])
 
+  useEffect(() => {
+    setIsSubmitting(false)
+  }, [pathname])
+
   return (
     <>
       <CreateInvoicePagesHeader
@@ -142,40 +137,12 @@ export default function AddMisc() {
           const selectedBank = bankData?.find((bank) => bank.id === data.bank)
           const selectedTax = taxationData?.find((tax) => tax.id === data.taxation)
           if (selectedBank && selectedTax) {
-            try {
-              setIsSubmitting(true)
-              const { data: newInvoiceData } = await createInvoice({
-                variables: {
-                  companyId: '658db32a6cf334fc362c9cad',
-                  date: new Date(data.date).toISOString(),
-                  vehicleNumber: data.vehicleNumber ?? '',
-                  bankId: data.bank,
-                  taxId: data.taxation,
-                  no: data.invoiceNumber,
-                  partyId: selectedParty?.id ?? '',
-                  invoiceItems: invoiceItems.map((invoiceItem) => ({
-                    itemId: invoiceItem.item?.id ?? '',
-                    price: invoiceItem.price,
-                    quantity: invoiceItem.quantity
-                  }))
-                }
-              })
-              setCreatedInvoice(newInvoiceData?.createInvoice as Invoice)
-              router.push(
-                `/tool/invoices/${newInvoiceData?.createInvoice?.id}`,
-                {},
-                {
-                  showProgressBar: true
-                }
-              )
-            } catch (error) {
-              toast({
-                variant: 'destructive',
-                title: 'Uh oh! Something went wrong!',
-                description: "Seems like this invoice can't be created right now."
-              })
-              setIsSubmitting(false)
-            }
+            setIsSubmitting(true)
+            void createInvoice({
+              ...data,
+              selectedBank,
+              selectedTax
+            })
           }
         })}
         id={FINALIZE_INVOICE_FORM_ID}

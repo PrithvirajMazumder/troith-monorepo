@@ -12,14 +12,19 @@ post {
 
 body:json {
   {
-    "no": 4,
+    "no": 5,
     "companyId": {{companyId}},
     "partyId": "cm4mm77pt000ibcux97pmsne0",
     "taxId": "cm4mi0cz00004bcux6sbuu7n3",
-    "vehicleNumber": "",
     "date": "2024-12-13T21:12:09.370Z",
     "bankId": "cm4mm2514000cbcuxuax8q5k2",
     "status": "DRAFT",
-    "shouldUseIgst": false
+    "shouldUseIgst": false,
+    "invoiceItems": [{
+      "quantity": 10,
+  "price": 300,
+  "isPriceTotal": false,
+  "itemId": "cm4mm4en1000gbcux7x5xu58b"
+    }]
   }
 }

@@ -8,10 +8,12 @@ import { ConfigureInvoiceItemCard } from '@troithWeb/app/tool/components/configu
 import { useState } from 'react'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
 import { useRouter } from 'next-nprogress-bar'
+import { BlankInvoiceItemType } from '@troithWeb/types/invoices'
+import { Prisma } from '@prisma/client'
 
 export default function ConfigureInvoiceItems() {
   const { selectedItems, setInvoiceItems: setSelectedInvoiceItems, invoiceItems: previouslyInvoiceItems } = useCreateInvoice()
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
+  const [invoiceItems, setInvoiceItems] = useState<BlankInvoiceItemType[]>(
     (() => {
       const isExistingInvoiceItem = previouslyInvoiceItems.some(
         (previouslyInvoiceItem) => !!selectedItems?.find((selectedItem) => selectedItem.id !== previouslyInvoiceItem?.item?.id)
@@ -19,8 +21,8 @@ export default function ConfigureInvoiceItems() {
       if (!previouslyInvoiceItems?.length || isExistingInvoiceItem) {
         return selectedItems.map((selectedItem) => ({
           item: selectedItem,
-          price: 0,
-          quantity: 0
+          price: new Prisma.Decimal(0),
+          quantity: BigInt(0)
         }))
       }
       return previouslyInvoiceItems
@@ -49,7 +51,7 @@ export default function ConfigureInvoiceItems() {
         })}
       </div>
       <Button
-        disabled={invoiceItems.some((invoiceItem) => invoiceItem.quantity * invoiceItem.price <= 0)}
+        disabled={invoiceItems.some((invoiceItem) => invoiceItem.price.times(invoiceItem.quantity.toString()) <= new Prisma.Decimal(0))}
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-32 right-4')}
         variant="default"
         onClick={() => {

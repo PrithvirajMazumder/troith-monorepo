@@ -1,13 +1,14 @@
 import { cn } from '@troith/shared/lib/util'
 import { Button, H4, Input, Separator } from '@troith/shared'
-import { InvoiceItem } from '@troithWeb/__generated__/graphql'
 import { useEffect, useState } from 'react'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { EqualIcon, X } from 'lucide-react'
+import { BlankInvoiceItemType } from '@troithWeb/types/invoices'
+import { Prisma } from '@prisma/client'
 
 type Props = {
-  invoiceItem: InvoiceItem
-  onItemUpdate: (invoiceItem: InvoiceItem) => void
+  invoiceItem: BlankInvoiceItemType
+  onItemUpdate: (invoiceItem: BlankInvoiceItemType) => void
 }
 
 export const ConfigureInvoiceItemSkeletonLoaderCard = () => {
@@ -31,12 +32,12 @@ export const ConfigureInvoiceItemSkeletonLoaderCard = () => {
 }
 
 export const ConfigureInvoiceItemCard = ({ invoiceItem, ...props }: Props) => {
-  const [quantity, setQuantity] = useState<number | null>(invoiceItem.quantity > 0 ? invoiceItem.quantity : null)
-  const [price, setPrice] = useState<number | null>(invoiceItem.price > 0 ? invoiceItem.price : null)
+  const [quantity, setQuantity] = useState<number | null>(parseInt(`${invoiceItem.quantity}`) > 0 ? parseInt(`${invoiceItem.quantity}`) : null)
+  const [price, setPrice] = useState<number | null>(parseInt(`${invoiceItem.price}`) > 0 ? parseInt(`${invoiceItem.price}`) : null)
 
   useEffect(() => {
     if (price && quantity && (price ?? 0) * (quantity ?? 0) > 0) {
-      props.onItemUpdate({ ...invoiceItem, price, quantity })
+      props.onItemUpdate({ ...invoiceItem, price: new Prisma.Decimal(price), quantity: BigInt(quantity) })
     }
   }, [price, quantity])
 

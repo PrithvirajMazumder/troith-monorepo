@@ -9,8 +9,8 @@ import { useSuspenseQuery } from '@apollo/client'
 import { PartyQueries } from '@troithWeb/app/tool/parties/queries/partyQueries'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { PartyCard } from '@troithWeb/app/tool/components/partyCard'
-import { Party } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next-nprogress-bar'
+import { Party } from '@prisma/client'
 
 export default function Parties() {
   const { selectedCompany } = useCompanyStore()

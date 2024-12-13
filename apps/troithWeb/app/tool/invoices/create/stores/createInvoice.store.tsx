@@ -1,8 +1,9 @@
 'use client'
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react'
-import { Bank, Invoice, InvoiceItem, Party, Tax } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next-nprogress-bar'
 import { ItemType } from '@troithWeb/types/items'
+import { Bank, Party, Tax } from '@prisma/client'
+import { BlankInvoiceItemType, InvoiceType } from '@troithWeb/types/invoices'
 
 type FinalInvoicePayload = { date: string; invoiceNumber: number; vehicleNumber?: string; bank: Bank; tax: Tax }
 type CreateInvoiceContextProps = {
@@ -12,8 +13,8 @@ type CreateInvoiceContextProps = {
   setSelectedTax: Dispatch<SetStateAction<Tax | null>>
   selectedItems: ItemType[]
   setSelectedItems: Dispatch<SetStateAction<ItemType[]>>
-  invoiceItems: InvoiceItem[]
-  setInvoiceItems: Dispatch<SetStateAction<InvoiceItem[]>>
+  invoiceItems: BlankInvoiceItemType[]
+  setInvoiceItems: Dispatch<SetStateAction<BlankInvoiceItemType[]>>
   selectedBank: Bank | null
   setSelectedBank: Dispatch<SetStateAction<Bank | null>>
   selectedDate: string
@@ -23,8 +24,8 @@ type CreateInvoiceContextProps = {
   selectedInvoiceNumber: number | null
   setSelectedInvoiceNumber: Dispatch<SetStateAction<number | null>>
   setFinalInvoiceData: (data: FinalInvoicePayload) => void
-  createdInvoice: Invoice | null
-  setCreatedInvoice: Dispatch<SetStateAction<Invoice | null>>
+  createdInvoice: InvoiceType | null
+  setCreatedInvoice: Dispatch<SetStateAction<InvoiceType | null>>
 }
 
 const CreateInvoiceContext = createContext<CreateInvoiceContextProps>({} as CreateInvoiceContextProps)
@@ -33,12 +34,12 @@ export const CreateInvoiceProvider = ({ children }: PropsWithChildren) => {
   const [selectedParty, setSelectedParty] = useState<Party | null>(null)
   const [selectedItems, setSelectedItems] = useState<ItemType[]>([])
   const [selectedTax, setSelectedTax] = useState<Tax | null>(null)
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
+  const [invoiceItems, setInvoiceItems] = useState<BlankInvoiceItemType[]>([])
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedVehicleNumber, setSelectedVehicleNumber] = useState('')
   const [selectedInvoiceNumber, setSelectedInvoiceNumber] = useState<number | null>(null)
-  const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null)
+  const [createdInvoice, setCreatedInvoice] = useState<InvoiceType | null>(null)
   const router = useRouter()
 
   const setFinalInvoiceData = (data: FinalInvoicePayload) => {

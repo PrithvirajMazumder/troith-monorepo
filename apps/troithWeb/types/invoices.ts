@@ -1,4 +1,5 @@
-import { Bank, Company, Invoice, InvoiceItem, Item, Party, Tax, Uom } from '@prisma/client'
+import { Bank, Company, Invoice, InvoiceItem, Party, Tax } from '@prisma/client'
+import { ItemType } from '@troithWeb/types/items'
 
 export type InvoiceType = Invoice & {
   party: Party
@@ -8,6 +9,6 @@ export type InvoiceType = Invoice & {
   bank: Bank
 }
 
-export type InvoiceItemType = InvoiceItem & { item: Item; uom: Uom }
-
+export type InvoiceItemType = InvoiceItem & { item: ItemType }
+export type BlankInvoiceItemType = Omit<InvoiceItemType, 'invoiceId' | 'id' | 'itemId' | 'isPriceTotal'>
 export type UpdateInvoice = Partial<Omit<Invoice, 'id' | 'no'>>

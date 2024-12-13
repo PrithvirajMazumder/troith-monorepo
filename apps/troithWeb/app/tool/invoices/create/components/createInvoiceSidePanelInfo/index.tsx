@@ -25,6 +25,7 @@ import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
+import { Prisma } from '@prisma/client'
 
 type Props = {
   panelWidth: number
@@ -152,8 +153,8 @@ export const CreateInvoiceSidePanelInfo = ({ panelWidth }: Props) => {
                               key={`sneak-peak-create-invoice-item-${item.id}`}
                               invoiceItem={{
                                 item,
-                                price: 0,
-                                quantity: 0
+                                price: new Prisma.Decimal(0),
+                                quantity: BigInt(0)
                               }}
                             />
                           ))

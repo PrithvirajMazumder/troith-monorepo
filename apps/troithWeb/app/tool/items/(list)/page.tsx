@@ -7,10 +7,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useSuspenseQuery } from '@apollo/client'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { Item } from '@troithWeb/__generated__/graphql'
 import { useRouter } from 'next-nprogress-bar'
 import { ItemQueries } from '@troithWeb/app/tool/items/queries/itemQueries'
 import { ItemCard } from '@troithWeb/app/tool/components/itemCard'
+import { ItemType } from '@troithWeb/types/items'
 
 export default function Items() {
   const { selectedCompany } = useCompanyStore()
@@ -33,7 +33,7 @@ export default function Items() {
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
         {itemsData?.items?.map((item) => (
-          <ItemCard onSelect={(item) => router.push(`/tool/items/${item.id}`)} entity={item as Item} key={`item-list-${item?.id}`} />
+          <ItemCard onSelect={(item) => router.push(`/tool/items/${item.id}`)} entity={item as ItemType} key={`item-list-${item?.id}`} />
         ))}
       </motion.div>
     </AnimatePresence>

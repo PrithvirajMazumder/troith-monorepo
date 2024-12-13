@@ -1,9 +1,9 @@
-import { Tax } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4, Separator } from '@troith/shared'
 import { CheckCircle, PercentDiamond } from 'lucide-react'
 import React from 'react'
 import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
+import { Tax } from '@prisma/client'
 
 type Props = {
   shouldShowAvatar?: boolean
