@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
-import { TaxRepository } from '@troithWeb/repositories/tax.repository'
 import { BankRepository } from '@troithWeb/repositories/bank.repository'
 
 export async function POST(req: NextRequest) {
@@ -14,3 +13,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unable to create bank' }, { status: 500 })
   }
 }
+
+
+

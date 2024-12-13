@@ -19,4 +19,5 @@ model Company {
   Item    Item[]
   Party   Party[]
   Invoice Invoice[]
+  Tax     Tax[]
 }

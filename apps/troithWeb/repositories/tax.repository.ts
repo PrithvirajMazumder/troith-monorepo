@@ -7,6 +7,13 @@ export const TaxRepository = () => {
       return prisma.tax.create({
         data: tax
       })
+    },
+    findByCompanyId: (companyId: string) => {
+      return prisma.tax.findMany({
+        where: {
+
+        }
+      })
     }
   }
 }

@@ -1,10 +1,12 @@
 model Tax {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   sgst      Int
   cgst      Int
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
+  companyId String
 
   Item    Item[]
+  company Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   Invoice Invoice[]
 }
