@@ -5,22 +5,17 @@ meta {
 }
 
 post {
-  url: {{BaseURL}}/api/companies
+  url: {{BaseURL}}/api/items
   body: json
   auth: none
 }
 
 body:json {
   {
-    "name": "escon",
-    "legalName": "escon engineering co.",
-    "addressLine1": "153/38 SN Roy Road",
-    "zipCode": 700038,
-    "state": "west bengal",
-    "gstin": "123456789",
-    "city": "kolkata",
-    "userId": "cm3ghb9zr000014cz8thd9whi",
-    "email": "p@p.com",
-    "phone": "1234567890"
+  "name": "resin",
+  "hsn": 8421,
+  "uomId": "cm4mm3mqw000ebcuxc4solv7w",
+  "companyId": {{companyId}},
+  "taxId": "cm4mi0cz00004bcux6sbuu7n3"
   }
 }

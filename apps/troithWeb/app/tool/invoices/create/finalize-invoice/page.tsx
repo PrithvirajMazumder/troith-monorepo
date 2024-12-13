@@ -21,41 +21,51 @@ import {
 } from '@troith/shared'
 import { useForm } from 'react-hook-form'
 import { CreateInvoicePagesHeader } from '@troithWeb/app/tool/invoices/create/components/createInvoicePagesHeader'
-import { useLazyQuery, useSuspenseQuery } from '@apollo/client'
-import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
 import { useEffect, useState } from 'react'
-import { BankQueries } from '@troithWeb/app/queries/bankQueries'
 import { BankCard } from '@troithWeb/app/tool/components/bankCard'
 import { FinaliseInvoiceFormFields, FinaliseInvoiceFormValidationSchema } from 'apps/troithWeb/app/tool/invoices/create/finalize-invoice/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { cn } from '@troith/shared/lib/util'
 import { CalendarIcon, ChevronRight, Loader } from 'lucide-react'
-import { InvoiceQueries } from '@troithWeb/app/tool/invoices/queries/invoiceQueries'
-import { GetInvoiceNumberWithNoQuery, Invoice } from '@troithWeb/__generated__/graphql'
+import { Invoice } from '@troithWeb/__generated__/graphql'
 import { format } from 'date-fns'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
 import { useToast } from '@troith/shared/hooks/use-toast'
 import { useRouter } from 'next-nprogress-bar'
 import { usePathname } from 'next/navigation'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { taxesKeys } from '@troithWeb/app/tool/queryKeys/taxes'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
+import { banksKeys } from '@troithWeb/app/tool/queryKeys/banks'
+import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
+import { fetchBanks, fetchInvoiceByNo, fetchNextInvoiceNo, fetchTaxes } from '@troithWeb/app/tool/invoices/create/finalize-invoice/apis'
+import { InvoiceType } from '@troithWeb/types/invoices'
+import { useSession } from 'next-auth/react'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
+  const { data: session } = useSession()
   const pathname = usePathname()
+  const { selectedCompany } = useCompanyStore()
   const { selectedParty, invoiceItems, setCreatedInvoice, setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const router = useRouter()
   const { toast } = useToast()
   const { createInvoice } = useFinalizeInvoice()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data: taxationData } = useSuspenseQuery(TaxQueries.all)
-  const { data: bankData } = useSuspenseQuery(BankQueries.all)
-  const { data: nextInvoiceNumberData } = useSuspenseQuery(InvoiceQueries.suggestedNextInvoiceNumber, {
-    fetchPolicy: 'network-only'
+  const { data: taxationData } = useSuspenseQuery({
+    queryKey: taxesKeys.lists(selectedCompany?.id ?? ''),
+    queryFn: () => fetchTaxes(selectedCompany?.id ?? '')
   })
-  const [fetchInvoiceByNumber, { data: invoiceNumberData, loading: isInvoiceNumberPresentLoading }] = useLazyQuery(
-    InvoiceQueries.getInvoiceNumberWithNo
-  )
+  const { data: bankData } = useSuspenseQuery({
+    queryKey: banksKeys.lists(session?.user?.id ?? ''),
+    queryFn: () => fetchBanks(session?.user?.id ?? '')
+  })
+  const { data: nextInvoiceNumberData } = useSuspenseQuery({
+    queryKey: invoicesKeys.nextNo(selectedCompany?.id ?? ''),
+    queryFn: fetchNextInvoiceNo
+  })
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
   const [isDatePopupOpen, setIsDatePopupOpen] = useState(false)
@@ -74,7 +84,7 @@ export default function AddMisc() {
     resolver: yupResolver(FinaliseInvoiceFormValidationSchema),
     defaultValues: {
       shouldUseIgst: false,
-      invoiceNumber: nextInvoiceNumberData?.suggestedNextInvoiceNumber ?? '',
+      invoiceNumber: nextInvoiceNumberData ?? '',
       date: ''
     }
   })
@@ -85,13 +95,19 @@ export default function AddMisc() {
   const date = watch('date')
   const debouncedInvoiceNumber = useDebounce(invoiceNumber, 1000)
 
+  const {
+    refetch: fetchInvoiceByNumber,
+    data: invoiceNumberData,
+    isFetching: isInvoiceNumberPresentLoading
+  } = useQuery({
+    queryKey: invoicesKeys.byNo(invoiceNumber),
+    queryFn: () => fetchInvoiceByNo(invoiceNumber),
+    enabled: Boolean(invoiceNumber)
+  })
+
   useEffect(() => {
-    if ((debouncedInvoiceNumber as string)?.length && debouncedInvoiceNumber !== nextInvoiceNumberData?.suggestedNextInvoiceNumber) {
-      void fetchInvoiceByNumber({
-        variables: {
-          no: `${debouncedInvoiceNumber}`
-        }
-      })
+    if ((debouncedInvoiceNumber as string)?.length && debouncedInvoiceNumber !== nextInvoiceNumberData) {
+      void fetchInvoiceByNumber()
     }
   }, [debouncedInvoiceNumber])
 
@@ -99,8 +115,8 @@ export default function AddMisc() {
     setIsSubmitting(false)
   }, [pathname])
 
-  const validateInvoiceNumber = (invoiceNumberData: GetInvoiceNumberWithNoQuery | null | undefined): boolean => {
-    if (invoiceNumberData?.invoiceByNo) {
+  const validateInvoiceNumber = (invoiceNumberData: InvoiceType | null | undefined): boolean => {
+    if (invoiceNumberData) {
       setError('invoiceNumber', {
         message: 'This invoice number cannot be used, an invoice is already present with this number'
       })
@@ -123,8 +139,8 @@ export default function AddMisc() {
       />
       <form
         onSubmit={handleSubmit(async (data) => {
-          const selectedBank = bankData?.banks?.find((bank) => bank.id === data.bank)
-          const selectedTax = taxationData?.taxes?.find((tax) => tax.id === data.taxation)
+          const selectedBank = bankData?.find((bank) => bank.id === data.bank)
+          const selectedTax = taxationData?.find((tax) => tax.id === data.taxation)
           if (selectedBank && selectedTax) {
             try {
               setIsSubmitting(true)
@@ -228,7 +244,7 @@ export default function AddMisc() {
             >
               {taxId?.length
                 ? (() => {
-                    const selectedTaxation = taxationData?.taxes?.find((tax) => tax.id === taxId)
+                    const selectedTaxation = taxationData?.find((tax) => tax.id === taxId)
                     return shouldUseIgst
                       ? `IGST: ${(selectedTaxation?.cgst ?? 0) + (selectedTaxation?.sgst ?? 0)}%`
                       : `CGST: ${selectedTaxation?.cgst}% | SGST: ${selectedTaxation?.sgst}%`
@@ -241,7 +257,7 @@ export default function AddMisc() {
               <DialogTitle>Taxation</DialogTitle>
               <DialogDescription>Choose a GST scheme for your invoice.</DialogDescription>
             </DialogHeader>
-            {taxationData?.taxes?.map((tax) => {
+            {taxationData?.map((tax) => {
               return (
                 <TaxCard
                   entity={tax}
@@ -278,7 +294,7 @@ export default function AddMisc() {
               variant="outline"
             >
               {(() => {
-                const selectedBank = bankData?.banks?.find((bank) => bank.id === bankId)
+                const selectedBank = bankData?.find((bank) => bank.id === bankId)
                 return selectedBank ? `${selectedBank?.name} | ${selectedBank?.accountNumber}` : 'Click to select a Bank'
               })()}
             </Button>
@@ -288,7 +304,7 @@ export default function AddMisc() {
               <DialogTitle>Bank</DialogTitle>
               <DialogDescription>Choose a bank for your invoice.</DialogDescription>
             </DialogHeader>
-            {bankData?.banks?.map((bank) => {
+            {bankData?.map((bank) => {
               return (
                 <BankCard
                   isCompact
