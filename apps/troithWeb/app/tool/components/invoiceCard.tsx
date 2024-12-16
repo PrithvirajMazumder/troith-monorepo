@@ -28,19 +28,6 @@ export const InvoiceSkeletonLoader = () => {
 }
 
 export const InvoiceCard = ({ invoice }: Props) => {
-  const getInvoiceStatusColor = (status: InvoiceStatus) => {
-    switch (status) {
-      case InvoiceStatus.CONFIRMED:
-        return 'blue'
-      case InvoiceStatus.DRAFT:
-        return 'zinc'
-      case InvoiceStatus.PAID:
-        return 'green'
-      default:
-        return 'zinc'
-    }
-  }
-
   return (
     <Link
       href={`/tool/invoices/${invoice.id}`}
@@ -83,12 +70,13 @@ export const InvoiceCard = ({ invoice }: Props) => {
         <Badge
           variant="outline"
           className={cn(
+            'capitalize',
             { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.PAID },
             { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.DRAFT },
             { 'bg-blue-100/50 0 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.CONFIRMED }
           )}
         >
-          {invoice?.status}
+          {invoice?.status?.toLowerCase()}
         </Badge>
         <Badge variant="outline">
           {invoice?.InvoiceItem?.reduce(

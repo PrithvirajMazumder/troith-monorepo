@@ -101,7 +101,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 onClick={() => setIsChangeStatusDropdownOpen(!isChangeStatusDropdownOpen)}
                 variant="ghost"
                 className={cn(
-                  'border border-dashed flex h-7 items-center mr-3 shadow ml-1',
+                  'border border-dashed flex h-7 items-center mr-3 shadow ml-1 capitalize',
                   {
                     'bg-green-50 dark:bg-green-900 hover:dark:bg-green-900/50 hover:bg-green-50/90 border-green-600':
                       invoice?.status === InvoiceStatus.PAID
@@ -117,7 +117,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 )}
               >
                 {updateInvoiceStatusMutation.isPending ? <Loader className={cn('w-4 h-4 mr-2 animate-spin')} /> : <CheckCircle className={cn('w-4 h-4 mr-2')} />}
-                {invoice?.status}
+                {invoice?.status?.toLowerCase()}
                 <ChevronDown className={cn('w-3 h-3 ml-2')} />
               </Button>
             </DropdownMenuTrigger>
@@ -134,7 +134,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                   }
                   className="capitalize"
                 >
-                  <PencilLine className="w-4 h-4 mr-2" /> {InvoiceStatus.DRAFT}
+                  <PencilLine className="w-4 h-4 mr-2 capitalize" /> {InvoiceStatus.DRAFT.toLowerCase()}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
@@ -145,7 +145,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                   }
                   className="capitalize"
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" /> {InvoiceStatus.CONFIRMED}
+                  <CheckCircle className="w-4 h-4 mr-2 capitalize" /> {InvoiceStatus.CONFIRMED.toLowerCase()}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="capitalize"
@@ -156,7 +156,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                     })
                   }
                 >
-                  <Gem className="w-4 h-4 mr-2" /> {InvoiceStatus.PAID}
+                  <Gem className="w-4 h-4 mr-2 capitalize" /> {InvoiceStatus.PAID.toLowerCase()}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenuPortal>
