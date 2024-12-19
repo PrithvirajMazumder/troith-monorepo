@@ -21,30 +21,27 @@ import {
 } from '@troith/shared'
 import { Check, ChevronRight, ChevronsUpDown, Loader } from 'lucide-react'
 import { cn } from '@troith/shared/lib/util'
-import { useMutation, useSuspenseQuery } from '@apollo/client'
-import { UomQueries } from '@troithWeb/app/queries/uomQueries'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { useEffect, useState } from 'react'
-import { TaxQueries } from '@troithWeb/app/queries/taxQueries'
 import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { CreateItemValidationFormFields, CreateItemValidationSchema } from '@troithWeb/app/tool/items/create/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { ItemMutations } from '@troithWeb/app/tool/items/queries/itemMutations'
 import { usePathname } from 'next/navigation'
 import { useToast } from '@troith/shared/hooks/use-toast'
 import { useRouter } from 'next-nprogress-bar'
+import { useSession } from 'next-auth/react'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { uomKeys } from '@troithWeb/app/tool/queryKeys/uomKeys'
+import { taxesKeys } from '@troithWeb/app/tool/queryKeys/taxes'
+import { fetchTaxes, fetchUoms, saveItem } from '@troithWeb/app/tool/items/create/apis'
+import { itemsKeys } from '@troithWeb/app/tool/queryKeys/items'
 
 export default function CreateItemPage() {
   const CREATE_ITEM_FORM_ID = 'CREATE_ITEM_FORM_ID'
+  const queryClient = useQueryClient()
   const { selectedCompany } = useCompanyStore()
-  const [createItem] = useMutation(ItemMutations.create)
-  const { data: uomsData } = useSuspenseQuery(UomQueries.all, {
-    variables: {
-      companyId: selectedCompany?.id ?? ''
-    }
-  })
-  const { data: taxesData } = useSuspenseQuery(TaxQueries.all)
+  const { data: session } = useSession()
   const [isUomPopupOpen, setIsUomPopupOpen] = useState(false)
   const [isTaxesPopupOpen, setIsTaxesPopupOpen] = useState(false)
   const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false)
@@ -52,6 +49,35 @@ export default function CreateItemPage() {
   const pathname = usePathname()
   const { toast } = useToast()
   const router = useRouter()
+
+  const createItemMutation = useMutation({
+    mutationFn: saveItem,
+    onSuccess: () => {
+      void queryClient?.invalidateQueries({
+        queryKey: itemsKeys.lists(selectedCompany?.id ?? '')
+      })
+      router.replace('/tool/items')
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong!',
+        description: "Seems like this item can't be created right now."
+      })
+      setIsSubmitting(false)
+    }
+  })
+
+  const { data: uomsData } = useSuspenseQuery({
+    queryKey: uomKeys.lists(session?.user?.id ?? ''),
+    queryFn: () => fetchUoms(session?.user?.id ?? '')
+  })
+
+  const { data: taxesData } = useSuspenseQuery({
+    queryKey: taxesKeys.lists(selectedCompany?.id ?? ''),
+    queryFn: () => fetchTaxes(selectedCompany?.id ?? '')
+  })
+
   const {
     handleSubmit,
     trigger,
@@ -70,25 +96,11 @@ export default function CreateItemPage() {
   }, [pathname])
 
   const onSubmit = async (item: CreateItemValidationFormFields) => {
-    try {
-      setIsSubmitting(true)
-      const { data: newItemData } = await createItem({
-        variables: {
-          companyId: selectedCompany?.id ?? '',
-          name: item.name,
-          hsn: parseInt(item.hsn),
-          taxId: item.tax,
-          uomId: item.uom
-        }
-      })
-      router.replace(`/tool/items/${newItemData?.createItem?.id}`)
-    } catch (e) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong!',
-        description: "Seems like this item can't be created right now."
-      })
-    }
+    setIsSubmitting(true)
+    createItemMutation?.mutate({
+      ...item,
+      companyId: selectedCompany?.id ?? ''
+    })
   }
 
   return (
@@ -150,7 +162,7 @@ export default function CreateItemPage() {
             <Popover open={isUomPopupOpen} onOpenChange={setIsUomPopupOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between capitalize">
-                  {selectedUom ? uomsData?.companyUoms.find((companyUom) => companyUom?.id === selectedUom)?.name : '...'}
+                  {selectedUom ? uomsData?.find((companyUom) => companyUom?.id === selectedUom)?.name : '...'}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -160,7 +172,7 @@ export default function CreateItemPage() {
                   <CommandList>
                     <CommandEmpty>No uom found.</CommandEmpty>
                     <CommandGroup>
-                      {uomsData?.companyUoms.map((uom) => (
+                      {uomsData?.map((uom) => (
                         <CommandItem
                           className="capitalize"
                           onSelect={() => {
@@ -191,7 +203,7 @@ export default function CreateItemPage() {
                 <Button variant="outline" role="combobox" className="w-full justify-between">
                   {selectedTax
                     ? (() => {
-                        const tax = taxesData?.taxes.find((tax) => tax?.id === selectedTax)
+                        const tax = taxesData?.find((tax) => tax?.id === selectedTax)
                         return `CGST: ${tax?.cgst} | SGST: ${tax?.sgst}`
                       })()
                     : '...'}
@@ -204,7 +216,7 @@ export default function CreateItemPage() {
                   <CommandList>
                     <CommandEmpty>No tax scheme found.</CommandEmpty>
                     <CommandGroup>
-                      {taxesData?.taxes.map((tax) => (
+                      {taxesData?.map((tax) => (
                         <CommandItem
                           onSelect={() => {
                             setValue('tax', tax.id ?? '')
