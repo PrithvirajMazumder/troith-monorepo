@@ -37,7 +37,7 @@ export const generateCompleteInvoicePdf = (invoice: InvoiceType) => {
       index + 1,
       invoiceItem?.item?.name ?? '',
       invoiceItem?.item?.hsn ?? '',
-      `${invoiceItem?.quantity} ${invoiceItem?.uom?.abbreviation}`,
+      `${invoiceItem?.quantity} ${invoiceItem?.item?.uom?.abbreviation}`,
       {
         text: `${convertAmountToInr(parseInt(`${invoiceItem?.price}`), false)}`,
         alignment: 'right'
