@@ -70,7 +70,7 @@ export default function CreateItemPage() {
 
   const { data: uomsData } = useSuspenseQuery({
     queryKey: uomKeys.lists(session?.user?.id ?? ''),
-    queryFn: () => fetchUoms(session?.user?.id ?? '')
+    queryFn: () => fetchUoms(session?.user?.id ?? ''),
   })
 
   const { data: taxesData } = useSuspenseQuery({
@@ -255,3 +255,5 @@ export default function CreateItemPage() {
     </>
   )
 }
+
+
