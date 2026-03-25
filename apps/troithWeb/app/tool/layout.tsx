@@ -40,7 +40,7 @@ import { ToolCommandBar } from '@troithWeb/app/components/toolCommandBar'
 import { useToolCommand } from '@troithWeb/app/components/toolCommandBar/hooks/useToolCommand'
 import { CompanyStoreProvider, useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { cn } from '@troith/shared/lib/util'
-import { ApolloWrapper } from '@troithWeb/lib/graphqlClient'
+
 import { CompanyCard } from '@troithWeb/app/tool/components/companyCard'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 import { signOut } from '@troithWeb/auth'
@@ -253,13 +253,11 @@ const Providers = ({ children }: PropsWithChildren) => {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <ApolloWrapper>
-          <CompanyStoreProvider>
-            <TooltipProvider>
-              <ToolLayout>{children}</ToolLayout>
-            </TooltipProvider>
-          </CompanyStoreProvider>
-        </ApolloWrapper>
+        <CompanyStoreProvider>
+          <TooltipProvider>
+            <ToolLayout>{children}</ToolLayout>
+          </TooltipProvider>
+        </CompanyStoreProvider>
       </SessionProvider>
     </QueryClientProvider>
   )
