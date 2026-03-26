@@ -35,4 +35,6 @@ enum InvoiceStatus {
   DRAFT
   CONFIRMED
   PAID
+  PARTIALLY_PAID
+  GST_SUBMITTED
 }

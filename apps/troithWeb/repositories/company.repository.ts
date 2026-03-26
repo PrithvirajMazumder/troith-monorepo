@@ -3,6 +3,13 @@ import { Prisma } from '@prisma/client'
 
 export function CompanyRepository() {
   return {
+    findById: (id: string) => {
+      return prisma.company.findUnique({
+        where: {
+          id
+        }
+      })
+    },
     findByUserId: (userId: string) => {
       return prisma.company.findMany({
         where: {

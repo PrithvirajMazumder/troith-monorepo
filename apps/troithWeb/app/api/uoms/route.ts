@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
-import { TaxRepository } from '@troithWeb/repositories/tax.repository'
 import { UomRepository } from '@troithWeb/repositories/uom.repository'
+import { CompanyRepository } from '@troithWeb/repositories/company.repository'
 
 export async function POST(req: NextRequest) {
   try {
-    const uomData: Prisma.UomCreateInput = await req.json()
+    const { name, abbreviation, companyId } = await req.json()
+    const companyRepository = CompanyRepository()
+    const company = await companyRepository.findById(companyId)
+    if (!company) {
+      return NextResponse.json({ error: 'Company not found' }, { status: 404 })
+    }
+    const uomData: Prisma.UomCreateInput = {
+      name,
+      abbreviation,
+      user: {
+        connect: {
+          id: company.userId
+        }
+      }
+    }
     const newUom = await UomRepository().create(uomData)
 
     return NextResponse.json(newUom, { status: 201 })

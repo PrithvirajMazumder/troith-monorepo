@@ -17,8 +17,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { CreateUomFormFields, CreateUomValidationSchema } from '@troithWeb/app/tool/uoms/components/CreateUomForm/validations'
 import { Check, Loader } from 'lucide-react'
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
-import { UomMutations } from '@troithWeb/app/tool/uoms/queries/uomMutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { useToast } from '@troith/shared/hooks/use-toast'
 
@@ -26,12 +25,38 @@ type Props = {
   onSubmit?: () => void
 }
 
+const createUom = async (uom: { name: string; abbreviation: string; companyId: string }) => {
+  const response = await fetch('/api/uoms', {
+    body: JSON.stringify(uom),
+    method: 'POST'
+  })
+  if (!response.ok) {
+    throw new Error('Failed to create UOM')
+  }
+  return response.json()
+}
+
 export const CreateUomForm = ({ onSubmit }: Props) => {
   const CREATE_UOM_FORM_ID = 'CREATE_UOM_FORM_ID'
   const { selectedCompany } = useCompanyStore()
   const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false)
+  const queryClient = useQueryClient()
 
-  const [create, { loading: isSubmitting }] = useMutation(UomMutations.create)
+  const createMutation = useMutation({
+    mutationFn: (uom: CreateUomFormFields) => createUom({ ...uom, companyId: selectedCompany?.id ?? '' }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['uoms', selectedCompany?.id] })
+      onSubmit && onSubmit()
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong!',
+        description: "Seems like this uom can't be created right now."
+      })
+    }
+  })
+  const isSubmitting = createMutation.isPending
   const {
     handleSubmit,
     trigger,
@@ -43,22 +68,7 @@ export const CreateUomForm = ({ onSubmit }: Props) => {
   const { toast } = useToast()
 
   const onContinue = async (uom: CreateUomFormFields) => {
-    try {
-      await create({
-        variables: {
-          companyId: selectedCompany?.id ?? '',
-          name: uom.name,
-          abbreviation: uom.abbreviation
-        }
-      })
-      onSubmit && onSubmit()
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong!',
-        description: "Seems like this uom can't be created right now."
-      })
-    }
+    await createMutation.mutate(uom)
   }
 
   return (

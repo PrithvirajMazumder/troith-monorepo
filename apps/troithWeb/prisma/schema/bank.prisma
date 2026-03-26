@@ -1,6 +1,6 @@
 model Bank {
   id            String    @id @default(cuid())
-  accountNumber Int
+  accountNumber BigInt
   name          String
   ifsc          String
   branch        String
