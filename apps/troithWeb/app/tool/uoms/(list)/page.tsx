@@ -4,18 +4,27 @@ import { Button, Dialog, DialogContent, DialogPortal } from '@troith/shared'
 import { Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { UomQueries } from '@troithWeb/app/tool/uoms/queries/uomQueries'
 import { UomCard } from '@troithWeb/app/tool/components/uomCard'
 import { Uom } from '@prisma/client'
 import { CreateUomForm } from '@troithWeb/app/tool/uoms/components/CreateUomForm'
 import { useState } from 'react'
 
+const fetchUoms = async (companyId: string) => {
+  const res = await fetch(`/api/uoms/company/${companyId}`)
+  if (!res.ok) throw new Error('Failed to fetch UOMs')
+  return res.json()
+}
+
 export default function UomsListPage() {
   const { selectedCompany } = useCompanyStore()
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
-  const { data: uomsData } = useSuspenseQuery(UomQueries.all(selectedCompany?.id ?? ''))
+  const { data: uomsData } = useQuery({
+    queryKey: ['uoms', selectedCompany?.id],
+    queryFn: () => fetchUoms(selectedCompany?.id ?? ''),
+    enabled: !!selectedCompany?.id
+  })
 
   return (
     <>

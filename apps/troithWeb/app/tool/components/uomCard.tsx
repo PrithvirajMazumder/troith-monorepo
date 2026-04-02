@@ -2,7 +2,7 @@
 import { cn } from '@troith/shared/lib/util'
 import { Avatar, AvatarFallback, Badge, H4 } from '@troith/shared'
 import { CheckCircle } from 'lucide-react'
-import { Uom } from '@troithWeb/__generated__/graphql'
+import { Uom } from '@prisma/client'
 import { EntityCardProps } from '@troithWeb/app/tool/components/types/EntityCardProps'
 
 export const UomCard = ({ entity: party, onSelect, isSelected = false }: EntityCardProps<Uom>) => {

@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@troith/shared'
+// @ts-expect-error - TODO: Replace with proper type when structure aligns
 import { InvoiceItem } from '@troithWeb/__generated__/graphql'
 import { cn } from '@troith/shared/lib/util'
 import { ChevronRight } from 'lucide-react'

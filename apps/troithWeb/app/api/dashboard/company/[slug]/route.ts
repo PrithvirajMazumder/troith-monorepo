@@ -1,6 +1,22 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@troithWeb/prisma'
 
+function serializeBigInt(obj: unknown): unknown {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj === 'bigint') return obj.toString()
+  if (typeof obj === 'object') {
+    if (Array.isArray(obj)) {
+      return obj.map(serializeBigInt)
+    }
+    const result: Record<string, unknown> = {}
+    for (const key in obj) {
+      result[key] = serializeBigInt((obj as Record<string, unknown>)[key])
+    }
+    return result
+  }
+  return obj
+}
+
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -71,21 +87,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       }
     })
 
-    return NextResponse.json({
-      summary: {
-        totalRevenue,
-        totalInvoices: invoices.length,
-        averageInvoiceValue: invoices.length > 0 ? totalRevenue / invoices.length : 0
-      },
-      statusBreakdown: Object.entries(statusCounts).map(([status, count]) => ({
-        status,
-        count
-      })),
-      topParties: Object.values(partyRevenue)
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 5),
-      monthlyRevenue: Object.values(monthlyData)
-    })
+    return NextResponse.json(
+      serializeBigInt({
+        summary: {
+          totalRevenue,
+          totalInvoices: invoices.length,
+          averageInvoiceValue: invoices.length > 0 ? totalRevenue / invoices.length : 0
+        },
+        statusBreakdown: Object.entries(statusCounts).map(([status, count]) => ({
+          status,
+          count
+        })),
+        topParties: Object.values(partyRevenue)
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5),
+        monthlyRevenue: Object.values(monthlyData)
+      })
+    )
   } catch (error) {
     console.error('Dashboard API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

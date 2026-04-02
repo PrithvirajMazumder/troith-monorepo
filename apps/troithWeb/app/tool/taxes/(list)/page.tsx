@@ -7,37 +7,37 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useQuery } from '@tanstack/react-query'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { PartyCard } from '@troithWeb/app/tool/components/partyCard'
+import { TaxCard } from '@troithWeb/app/tool/components/taxCard'
 import { useRouter } from 'next-nprogress-bar'
-import { Party } from '@prisma/client'
+import { Tax } from '@prisma/client'
 
-const fetchParties = async (companyId: string) => {
-  const res = await fetch(`/api/parties/company/${companyId}`)
-  if (!res.ok) throw new Error('Failed to fetch parties')
+const fetchTaxes = async (companyId: string) => {
+  const res = await fetch(`/api/taxes/company/${companyId}`)
+  if (!res.ok) throw new Error('Failed to fetch taxes')
   return res.json()
 }
 
-export default function Parties() {
+export default function TaxesPage() {
   const { selectedCompany } = useCompanyStore()
   const router = useRouter()
-  const { data: parties } = useQuery({
-    queryKey: ['parties', selectedCompany?.id],
-    queryFn: () => fetchParties(selectedCompany?.id ?? ''),
+  const { data: taxes } = useQuery({
+    queryKey: ['taxes', selectedCompany?.id],
+    queryFn: () => fetchTaxes(selectedCompany?.id ?? ''),
     enabled: !!selectedCompany?.id
   })
 
   return (
     <AnimatePresence>
       <Link
-        href="/tool/parties/create"
+        href="/tool/taxes/create"
         className={cn('shadow-md shadow-primary dark:shadow-none absolute bottom-20 right-4', buttonVariants({ variant: 'default' }))}
       >
         <Plus className="h-4 w-4 mr-2" />
-        Create party
+        Create tax
       </Link>
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full gap-4 pb-24">
-        {parties?.map((party: Party) => (
-          <PartyCard onSelect={(party) => router.push(`/tool/parties/${party.id}`)} entity={party as Party} key={`party-list-${party?.id}`} />
+        {taxes?.map((tax: Tax) => (
+          <TaxCard onSelect={(tax) => router.push(`/tool/taxes/${tax.id}`)} entity={tax} key={`tax-list-${tax?.id}`} />
         ))}
       </motion.div>
     </AnimatePresence>

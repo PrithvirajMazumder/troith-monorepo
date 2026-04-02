@@ -1,7 +1,7 @@
-import { InvoiceStatus } from '@troithWeb/__generated__/graphql'
-
-export const InvoiceStatuses: Record<InvoiceStatus, string> = {
+export const InvoiceStatuses = {
   Confirmed: 'confirmed',
   Draft: 'draft',
   Paid: 'paid'
 } as const
+
+export type InvoiceStatus = (typeof InvoiceStatuses)[keyof typeof InvoiceStatuses]

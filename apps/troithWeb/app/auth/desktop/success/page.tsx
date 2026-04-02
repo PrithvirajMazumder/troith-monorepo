@@ -6,7 +6,7 @@ import { Button } from '@troith/shared/components/ui/button'
 import { H1, P } from '@troith/shared/components/typography'
 import { ScrollText } from 'lucide-react'
 import Link from 'next/link'
-import { DESKTOP_PROTOCOL, DESKTOP_AUTH_CALLBACK_PATH } from '@troithWeb/lib/desktop-auth'
+import { DESKTOP_PROTOCOL, DESKTOP_AUTH_CALLBACK_PATH } from '@troithWeb/lib/desktop-auth-constants'
 
 export default function DesktopAuthSuccessPage() {
   const { data: session, status } = useSession()

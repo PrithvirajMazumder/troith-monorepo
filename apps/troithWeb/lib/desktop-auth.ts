@@ -1,8 +1,9 @@
+'use server'
+
 import { randomBytes, createHash } from 'crypto'
 import { cookies } from 'next/headers'
 
-export const DESKTOP_PROTOCOL = 'troith'
-export const DESKTOP_AUTH_CALLBACK_PATH = 'auth/callback'
+export { DESKTOP_PROTOCOL, DESKTOP_AUTH_CALLBACK_PATH } from './desktop-auth-constants'
 
 const DESKTOP_PKCE_VERIFIER_COOKIE = 'desktop_pkce_verifier'
 const DESKTOP_PKCE_STATE_COOKIE = 'desktop_pkce_state'

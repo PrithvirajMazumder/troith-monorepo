@@ -20,19 +20,36 @@ import {
   PopoverTrigger,
   Separator
 } from '@troith/shared'
-import { useMutation, useSuspenseQuery } from '@apollo/client'
-import { StateQueries } from '@troithWeb/app/queries/stateQueries'
+import { INDIAN_STATES, IndianState } from '@troithWeb/app/constants/indianStates'
 import { Check, ChevronRight, ChevronsUpDown, Loader } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@troith/shared/lib/util'
 import { useForm } from 'react-hook-form'
 import { CreatePartyFormFields, CreatePartySchema } from 'apps/troithWeb/app/tool/parties/create/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { PartyMutations } from '@troithWeb/app/tool/parties/queries/partyMutations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { useToast } from '@troith/shared/hooks/use-toast'
-import { usePathname } from 'next/navigation'
 import { useRouter } from 'next-nprogress-bar'
+import { useMutation } from '@tanstack/react-query'
+
+const createParty = async (data: {
+  companyId: string
+  zipCode: number
+  name: string
+  city: string
+  state: string
+  gstin: string
+  addressLine1: string
+  addressLine2: string
+}) => {
+  const res = await fetch('/api/parties', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  if (!res.ok) throw new Error('Failed to create party')
+  return res.json()
+}
 
 export default function CreatePartyPage() {
   const CREATE_PARTY_FORM_ID = 'CREATE_PARTY_FORM_ID'
@@ -40,9 +57,9 @@ export default function CreatePartyPage() {
   const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { selectedCompany } = useCompanyStore()
-  const { data: stateData } = useSuspenseQuery(StateQueries.allIndianStates)
-  const [createParty] = useMutation(PartyMutations.create)
-  const pathname = usePathname()
+  const createPartyMutation = useMutation({
+    mutationFn: createParty
+  })
   const router = useRouter()
   const { toast } = useToast()
   const {
@@ -57,10 +74,6 @@ export default function CreatePartyPage() {
     reValidateMode: 'onChange'
   })
   const state = watch('state')
-
-  useEffect(() => {
-    setIsSubmitting(false)
-  }, [pathname])
 
   return (
     <>
@@ -86,26 +99,25 @@ export default function CreatePartyPage() {
         onSubmit={handleSubmit(async (data) => {
           try {
             setIsSubmitting(true)
-            const resp = await createParty({
-              variables: {
-                companyId: selectedCompany?.id ?? '',
-                zipCode: data.zipCode,
-                name: data.name,
-                city: data.city,
-                state: data.state,
-                gstin: data.gstin,
-                addressLine1: data.gstin,
-                partyItemIds: [],
-                addressLine2: data.addressLine2 ?? ''
-              }
+            const resp = await createPartyMutation.mutateAsync({
+              companyId: selectedCompany?.id ?? '',
+              zipCode: data.zipCode,
+              name: data.name,
+              city: data.city,
+              state: data.state,
+              gstin: data.gstin,
+              addressLine1: data.addressLine1,
+              addressLine2: data.addressLine2 ?? ''
             })
-            router.replace(`/tool/parties/${resp?.data?.createParty.id}`)
+            router.replace(`/tool/parties/${resp?.id}`)
           } catch (error) {
             toast({
               variant: 'destructive',
               title: 'Uh oh! Something went wrong!',
               description: "Seems like this party can't be created right now."
             })
+          } finally {
+            setIsSubmitting(false)
           }
         })}
         className="flex flex-col gap-3 px-1 w-full"
@@ -160,7 +172,7 @@ export default function CreatePartyPage() {
               <Popover open={isStatePopupOpen} onOpenChange={setIsStatePopupOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {state ? stateData?.indianStates.find((foundState) => foundState?.value && foundState?.value === state)?.displayName : '...'}
+                    {state ? INDIAN_STATES.find((foundState) => foundState?.value && foundState?.value === state)?.displayName : '...'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -170,7 +182,7 @@ export default function CreatePartyPage() {
                     <CommandList>
                       <CommandEmpty>No state found.</CommandEmpty>
                       <CommandGroup>
-                        {stateData?.indianStates.map((indianState) => (
+                        {INDIAN_STATES.map((indianState: IndianState) => (
                           <CommandItem
                             onSelect={() => {
                               setValue('state', indianState.value)

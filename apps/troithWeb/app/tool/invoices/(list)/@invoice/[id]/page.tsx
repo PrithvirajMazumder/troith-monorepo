@@ -27,6 +27,12 @@ import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/an
 import { useEffect, useRef, useState } from 'react'
 import { CustomEventsNames } from '@troithWeb/app/tool/constants/customEventsNames'
 import { format } from 'date-fns'
+
+const formatDateSafe = (date: unknown): string => {
+  if (!date) return '-'
+  const parsed = new Date(date as string)
+  return isNaN(parsed.getTime()) ? '-' : format(parsed, 'dd/MM/yyyy')
+}
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
@@ -51,7 +57,7 @@ const updateStatus = async ({ invoiceStatus, invoiceId }: { invoiceId: string; i
 
 export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
   const queryClient = useQueryClient()
-  const {selectedCompany} = useCompanyStore()
+  const { selectedCompany } = useCompanyStore()
   const { data: invoice } = useSuspenseQuery({
     queryKey: invoicesKeys.detail(invoiceId),
     queryFn: () => fetchInvoice(invoiceId)
@@ -116,7 +122,11 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                   }
                 )}
               >
-                {updateInvoiceStatusMutation.isPending ? <Loader className={cn('w-4 h-4 mr-2 animate-spin')} /> : <CheckCircle className={cn('w-4 h-4 mr-2')} />}
+                {updateInvoiceStatusMutation.isPending ? (
+                  <Loader className={cn('w-4 h-4 mr-2 animate-spin')} />
+                ) : (
+                  <CheckCircle className={cn('w-4 h-4 mr-2')} />
+                )}
                 {invoice?.status?.toLowerCase()}
                 <ChevronDown className={cn('w-3 h-3 ml-2')} />
               </Button>
@@ -236,7 +246,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Date:</p>
-                  <p className="text-sm text-muted-foreground italic font-semibold">{format(invoice?.date ?? new Date(), 'dd/MM/yyyy')}</p>
+                  <p className="text-sm text-muted-foreground italic font-semibold">{formatDateSafe(invoice?.date)}</p>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-sm text-muted-foreground">Vehicle no:</p>

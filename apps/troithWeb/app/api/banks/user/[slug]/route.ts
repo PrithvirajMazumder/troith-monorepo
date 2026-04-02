@@ -6,8 +6,12 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
   try {
     const bankRepository = BankRepository()
     const banks = await bankRepository.findByUserId(userId)
+    const serializedBanks = banks.map((bank) => ({
+      ...bank,
+      accountNumber: bank.accountNumber.toString()
+    }))
 
-    return NextResponse.json(banks, { status: 201 })
+    return NextResponse.json(serializedBanks, { status: 201 })
   } catch (error) {
     console.error('Error finding banks:', error)
     return NextResponse.json({ error: 'Unable to find banks' }, { status: 500 })
