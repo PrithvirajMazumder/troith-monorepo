@@ -21,6 +21,46 @@ export function CompanyRepository() {
       return prisma.company.create({
         data: company
       })
+    },
+    findWithFilters: async ({
+      userId,
+      search,
+      page,
+      limit,
+      sortBy = 'name',
+      sortOrder = 'asc'
+    }: {
+      userId: string
+      search?: string
+      page: number
+      limit: number
+      sortBy?: string
+      sortOrder?: 'asc' | 'desc'
+    }) => {
+      const where: Prisma.CompanyWhereInput = { userId, deletedAt: null }
+
+      if (search && search.trim().length > 0) {
+        const searchTerm = search.trim()
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { legalName: { contains: searchTerm, mode: 'insensitive' } },
+          { gstin: { contains: searchTerm, mode: 'insensitive' } },
+          { state: { contains: searchTerm, mode: 'insensitive' } },
+          { city: { contains: searchTerm, mode: 'insensitive' } }
+        ]
+      }
+
+      const [data, total] = await Promise.all([
+        prisma.company.findMany({
+          where,
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy: { [sortBy]: sortOrder }
+        }),
+        prisma.company.count({ where })
+      ])
+
+      return { data, total }
     }
   }
 }

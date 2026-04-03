@@ -58,7 +58,7 @@ export const ToolLayout = ({ children }: PropsWithChildren) => {
   }
 
   return (
-    <CompanyStoreProvider>
+    <CompanyStoreProvider initialCompany={null}>
       <TooltipProvider>
         <Dialog open={isSelectCompanyModalOpen} onOpenChange={toggleSelectCompanyModal}>
           <DialogPortal>

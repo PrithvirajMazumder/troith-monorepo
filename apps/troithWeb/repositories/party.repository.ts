@@ -17,6 +17,35 @@ export const PartyRepository = () => {
           }
         }
       })
+    },
+    findWithSearch: async ({
+      companyId,
+      search
+    }: {
+      companyId: string
+      search?: string
+    }) => {
+      const where: Prisma.PartyWhereInput = { companyId, deletedAt: null }
+
+      if (search && search.trim().length > 0) {
+        const searchTerm = search.trim()
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { gstin: { contains: searchTerm, mode: 'insensitive' } },
+          { state: { contains: searchTerm, mode: 'insensitive' } }
+        ]
+      }
+
+      return prisma.party.findMany({
+        where,
+        include: {
+          PartyItem: {
+            include: {
+              item: true
+            }
+          }
+        }
+      })
     }
   }
 }

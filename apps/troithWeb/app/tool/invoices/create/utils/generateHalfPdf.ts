@@ -12,7 +12,9 @@ import { format } from 'date-fns'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
-window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
+if (typeof window !== 'undefined') {
+  window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
+}
 
 const generate = (pdf: TDocumentDefinitions) => {
   return pdfMake.createPdf(pdf)

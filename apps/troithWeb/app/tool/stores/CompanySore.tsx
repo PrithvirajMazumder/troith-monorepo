@@ -13,44 +13,43 @@ export type CompanySoreValues = {
 
 const CompanyStore = createContext<CompanySoreValues>({} as CompanySoreValues)
 
-export const CompanyStoreProvider = ({ children }: PropsWithChildren) => {
-  const SelectedCompanyLocalStorageKey = 'SELECTED_COMPANY_LOCAL_STORAGE_KEY'
+const SELECTED_COMPANY_COOKIE_KEY = 'selected_company'
+
+const setCompanyCookie = (company: Company | null) => {
+  if (company) {
+    document.cookie = `${SELECTED_COMPANY_COOKIE_KEY}=${encodeURIComponent(JSON.stringify(company))};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`
+  } else {
+    document.cookie = `${SELECTED_COMPANY_COOKIE_KEY}=;path=/;max-age=0`
+  }
+}
+
+const useCompanyFetcher = (isSelectCompanyModalOpen: boolean) => {
   const { data: session } = useSession()
   const [companies, setCompanies] = useState<Company[]>([])
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
+
+  useEffect(() => {
+    if (isSelectCompanyModalOpen && companies.length === 0 && session?.user?.id) {
+      fetch(`/api/companies/${session.user.id}`)
+        .then((resp) => resp.json())
+        .then((data: Company[]) => setCompanies(data))
+    }
+  }, [isSelectCompanyModalOpen, session])
+
+  return companies
+}
+
+export const CompanyStoreProvider = ({ children, initialCompany }: PropsWithChildren<{ initialCompany: Company | null }>) => {
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(initialCompany)
   const [isSelectCompanyModalOpen, setIsSelectCompanyModalOpen] = useState(false)
+  const companies = useCompanyFetcher(isSelectCompanyModalOpen)
   const isMounted = useRef(false)
-
-  useEffect(() => {
-    const locallySelectedCompany = localStorage.getItem(SelectedCompanyLocalStorageKey)
-    if (locallySelectedCompany) {
-      setSelectedCompany(JSON.parse(locallySelectedCompany) as Company)
-    }
-  }, [])
-
-  const fetchCompanies = async (userId: string) => {
-    const resp = await fetch(`/api/companies/${userId}`)
-    const companies: Company[] = await resp.json()
-    setCompanies(companies)
-  }
-
-  useEffect(() => {
-    if (session?.user) {
-      console.log('session.user: ', session.user)
-      void fetchCompanies(session?.user?.id ?? '')
-    }
-  }, [session])
 
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true
       return
     }
-    if (selectedCompany) {
-      localStorage.setItem(SelectedCompanyLocalStorageKey, JSON.stringify(selectedCompany))
-    } else {
-      localStorage.removeItem(SelectedCompanyLocalStorageKey)
-    }
+    setCompanyCookie(selectedCompany)
   }, [selectedCompany])
 
   return (
@@ -60,7 +59,7 @@ export const CompanyStoreProvider = ({ children }: PropsWithChildren) => {
         toggleSelectCompanyModal: setIsSelectCompanyModalOpen,
         selectedCompany,
         setSelectedCompany,
-        companies: companies
+        companies
       }}
     >
       {children}

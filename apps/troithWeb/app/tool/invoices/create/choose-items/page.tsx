@@ -1,5 +1,5 @@
 'use client'
-import { ItemCard } from '@troithWeb/app/tool/components/itemCard'
+import { ItemCard, ItemCardSkeletonLoader } from '@troithWeb/app/tool/components/itemCard'
 import { Button } from '@troith/shared'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { cn } from '@troith/shared/lib/util'
@@ -10,7 +10,7 @@ import { useRouter } from 'next-nprogress-bar'
 import { motion } from 'framer-motion'
 import { animateBasicMotionOpacity } from '@troithWeb/app/tool/invoices/utils/animations'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { itemsKeys } from '@troithWeb/app/tool/queryKeys/items'
 import { ItemType } from '@troithWeb/types/items'
 
@@ -24,9 +24,10 @@ export default function SelectItemsCreateInvoicePage() {
   const { selectedItems: previouslySelectedItems, selectedParty, setSelectedItems: setFinalSelectedItems } = useCreateInvoice()
   const [selectedItems, setSelectedItems] = useState<ItemType[]>(previouslySelectedItems)
   const [selectedItemsMap, setSelectedItemsMap] = useState<ItemsMap>({} as ItemsMap)
-  const { data: items } = useSuspenseQuery({
+  const { data: items, isLoading } = useQuery({
     queryKey: itemsKeys.lists(selectedCompany?.id ?? ''),
-    queryFn: () => fetchItems(selectedCompany?.id ?? '')
+    queryFn: () => fetchItems(selectedCompany?.id ?? ''),
+    enabled: !!selectedCompany?.id
   })
   const router = useRouter()
 
@@ -53,9 +54,18 @@ export default function SelectItemsCreateInvoicePage() {
     <>
       <CreateInvoicePagesHeader className="!mb-2" title="Select Items" subtitle="Select the items you would like to add to this invoice." />
       <motion.div {...animateBasicMotionOpacity()} className="flex flex-col gap-3 mt-4">
-        {items?.map((item) => (
-          <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item} key={item?.id} onSelect={handleItemSelection} />
-        ))}
+        {isLoading ? (
+          <>
+            <ItemCardSkeletonLoader />
+            <ItemCardSkeletonLoader />
+            <ItemCardSkeletonLoader />
+            <ItemCardSkeletonLoader />
+          </>
+        ) : (
+          items?.map((item) => (
+            <ItemCard isSelected={!!selectedItemsMap[item.id]} entity={item} key={item?.id} onSelect={handleItemSelection} />
+          ))
+        )}
       </motion.div>
       <Button
         disabled={!selectedItems?.length}

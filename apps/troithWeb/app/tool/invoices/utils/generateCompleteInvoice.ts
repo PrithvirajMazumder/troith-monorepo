@@ -10,7 +10,9 @@ import { getDecimalPart } from '@troithWeb/utils/number'
 import { InvoiceItemType, InvoiceType } from '@troithWeb/types/invoices'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
-window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
+if (typeof window !== 'undefined') {
+  window.pdfMake.vfs['Roboto.ttf'] = robotoBase64
+}
 
 export const InvoiceFontSizes = {
   HeadTitleFontSize: 18,

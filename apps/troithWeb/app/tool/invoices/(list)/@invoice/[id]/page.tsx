@@ -38,7 +38,7 @@ import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getI
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { InvoiceStatus } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 
@@ -58,9 +58,10 @@ const updateStatus = async ({ invoiceStatus, invoiceId }: { invoiceId: string; i
 export default function InvoicePage({ params: { id: invoiceId } }: { params: { id: string } }) {
   const queryClient = useQueryClient()
   const { selectedCompany } = useCompanyStore()
-  const { data: invoice } = useSuspenseQuery({
+  const { data: invoice, isLoading } = useQuery({
     queryKey: invoicesKeys.detail(invoiceId),
-    queryFn: () => fetchInvoice(invoiceId)
+    queryFn: () => fetchInvoice(invoiceId),
+    enabled: !!invoiceId
   })
   const updateInvoiceStatusMutation = useMutation({
     mutationFn: (...params: [...Parameters<typeof updateStatus>]) => updateStatus(...params),
@@ -95,6 +96,19 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
       window.removeEventListener(CustomEventsNames.ToolSideMenuResizeEventName, handleResize)
     }
   }, [invoice])
+
+  if (isLoading) {
+    return (
+      <AnimatePresence>
+        <motion.div {...animateBasicMotionOpacity()} className="flex flex-col w-full h-full justify-center items-center gap-2">
+          <Loader className="w-6 h-6 min-w-6 min-h-6 animate-spin" />
+          <motion.p {...animateBasicMotionOpacity()} className="text-muted-foreground text-sm">
+            Loading
+          </motion.p>
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
 
   return (
     <>

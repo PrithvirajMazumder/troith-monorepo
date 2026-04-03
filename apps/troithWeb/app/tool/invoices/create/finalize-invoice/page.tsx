@@ -32,7 +32,7 @@ import { format } from 'date-fns'
 import { useCreateInvoice } from '@troithWeb/app/tool/invoices/create/stores/createInvoice.store'
 import { useFinalizeInvoice } from '@troithWeb/app/tool/invoices/create/finalize-invoice/hooks/useFinalizeInvoice'
 import { usePathname } from 'next/navigation'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { taxesKeys } from '@troithWeb/app/tool/queryKeys/taxes'
 import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { banksKeys } from '@troithWeb/app/tool/queryKeys/banks'
@@ -49,17 +49,20 @@ export default function AddMisc() {
   const { setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const { createInvoice } = useFinalizeInvoice()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data: taxationData } = useSuspenseQuery({
+  const { data: taxationData } = useQuery({
     queryKey: taxesKeys.lists(selectedCompany?.id ?? ''),
-    queryFn: () => fetchTaxes(selectedCompany?.id ?? '')
+    queryFn: () => fetchTaxes(selectedCompany?.id ?? ''),
+    enabled: !!selectedCompany?.id
   })
-  const { data: bankData } = useSuspenseQuery({
+  const { data: bankData } = useQuery({
     queryKey: banksKeys.lists(session?.user?.id ?? ''),
-    queryFn: () => fetchBanks(session?.user?.id ?? '')
+    queryFn: () => fetchBanks(session?.user?.id ?? ''),
+    enabled: !!session?.user?.id
   })
-  const { data: nextInvoiceNumberData } = useSuspenseQuery({
+  const { data: nextInvoiceNumberData } = useQuery({
     queryKey: invoicesKeys.nextNo(selectedCompany?.id ?? ''),
-    queryFn: fetchNextInvoiceNo
+    queryFn: fetchNextInvoiceNo,
+    enabled: !!selectedCompany?.id
   })
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
@@ -79,7 +82,7 @@ export default function AddMisc() {
     resolver: yupResolver(FinaliseInvoiceFormValidationSchema),
     defaultValues: {
       shouldUseIgst: false,
-      invoiceNumber: nextInvoiceNumberData ?? '',
+      invoiceNumber: nextInvoiceNumberData ?? undefined,
       date: ''
     }
   })

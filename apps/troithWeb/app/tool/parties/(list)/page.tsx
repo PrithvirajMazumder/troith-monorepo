@@ -10,9 +10,15 @@ import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
 import { PartyCard } from '@troithWeb/app/tool/components/partyCard'
 import { useRouter } from 'next-nprogress-bar'
 import { Party } from '@prisma/client'
+import { useSearchParams } from 'next/navigation'
+import { useDebounce } from '@troith/shared'
+import { partiesKeys } from '@troithWeb/app/tool/queryKeys/parties'
 
-const fetchParties = async (companyId: string) => {
-  const res = await fetch(`/api/parties/company/${companyId}`)
+const fetchParties = async (companyId: string, search?: string) => {
+  const params = new URLSearchParams()
+  if (search) params.set('search', search)
+  const query = params.toString()
+  const res = await fetch(`/api/parties/company/${companyId}${query ? `?${query}` : ''}`)
   if (!res.ok) throw new Error('Failed to fetch parties')
   return res.json()
 }
@@ -20,9 +26,14 @@ const fetchParties = async (companyId: string) => {
 export default function Parties() {
   const { selectedCompany } = useCompanyStore()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const search = searchParams.get('search') || ''
+  const debouncedSearch = useDebounce(search, 300)
+
   const { data: parties } = useQuery({
-    queryKey: ['parties', selectedCompany?.id],
-    queryFn: () => fetchParties(selectedCompany?.id ?? ''),
+    queryKey: partiesKeys.lists(selectedCompany?.id ?? '', String(debouncedSearch) || undefined),
+    queryFn: () => fetchParties(selectedCompany?.id ?? '', String(debouncedSearch) || undefined),
     enabled: !!selectedCompany?.id
   })
 

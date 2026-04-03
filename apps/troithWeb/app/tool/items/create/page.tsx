@@ -31,7 +31,7 @@ import { usePathname } from 'next/navigation'
 import { useToast } from '@troith/shared/hooks/use-toast'
 import { useRouter } from 'next-nprogress-bar'
 import { useSession } from 'next-auth/react'
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { uomKeys } from '@troithWeb/app/tool/queryKeys/uomKeys'
 import { taxesKeys } from '@troithWeb/app/tool/queryKeys/taxes'
 import { fetchTaxes, fetchUoms, saveItem } from '@troithWeb/app/tool/items/create/apis'
@@ -68,14 +68,16 @@ export default function CreateItemPage() {
     }
   })
 
-  const { data: uomsData } = useSuspenseQuery({
+  const { data: uomsData } = useQuery({
     queryKey: uomKeys.lists(session?.user?.id ?? ''),
     queryFn: () => fetchUoms(session?.user?.id ?? ''),
+    enabled: !!session?.user?.id
   })
 
-  const { data: taxesData } = useSuspenseQuery({
+  const { data: taxesData } = useQuery({
     queryKey: taxesKeys.lists(selectedCompany?.id ?? ''),
-    queryFn: () => fetchTaxes(selectedCompany?.id ?? '')
+    queryFn: () => fetchTaxes(selectedCompany?.id ?? ''),
+    enabled: !!selectedCompany?.id
   })
 
   const {

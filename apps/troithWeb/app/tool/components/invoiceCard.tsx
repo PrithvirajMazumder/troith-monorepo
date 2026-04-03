@@ -32,7 +32,18 @@ export const InvoiceSkeletonLoader = () => {
 export const InvoiceCard = ({ invoice }: Props) => {
   return (
     <Link href={`/tool/invoices/${invoice.id}`} className="block">
-      <div className={cn('flex flex-col w-full gap-1 rounded-lg border p-3 text-left text-sm transition-all hover:bg-zinc-800/10')}>
+      <div
+        className={cn(
+          'flex flex-col w-full gap-1 rounded-lg border p-3 text-left text-sm transition-all',
+          {
+            'bg-orange-500/5 dark:bg-orange-800/10 hover:bg-orange-500/10 dark:hover:bg-orange-800/20':
+              invoice?.status === InvoiceStatus.DRAFT || invoice?.status === InvoiceStatus.PARTIALLY_PAID,
+            'bg-blue-500/5 dark:bg-blue-800/10 hover:bg-blue-500/10 dark:hover:bg-blue-800/20': invoice?.status === InvoiceStatus.CONFIRMED,
+            'bg-green-500/5 dark:bg-green-800/10 hover:bg-green-500/10 dark:hover:bg-green-800/20': invoice?.status === InvoiceStatus.PAID,
+            'bg-purple-500/5 dark:bg-purple-800/10 hover:bg-purple-500/10 dark:hover:bg-purple-800/20': invoice?.status === InvoiceStatus.GST_SUBMITTED
+          }
+        )}
+      >
         <div className="flex w-full flex-col gap-1">
           <div className="flex items-center">
             <div className="flex items-center gap-2 w-full">
@@ -57,9 +68,9 @@ export const InvoiceCard = ({ invoice }: Props) => {
             variant="outline"
             className={cn(
               'capitalize',
-              { 'bg-green-100/50  border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.PAID },
-              { 'bg-yellow-100/50 border-yellow-200/50 dark:bg-yellow-950': invoice?.status === InvoiceStatus.CONFIRMED },
-              { 'bg-blue-100/50 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.DRAFT },
+              { 'bg-green-100/50 border-green-200/50 dark:bg-green-950': invoice?.status === InvoiceStatus.PAID },
+              { 'bg-blue-100/50 border-blue-200/50 dark:bg-blue-950': invoice?.status === InvoiceStatus.CONFIRMED },
+              { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.DRAFT },
               { 'bg-orange-100/50 border-orange-200/50 dark:bg-orange-950': invoice?.status === InvoiceStatus.PARTIALLY_PAID },
               { 'bg-purple-100/50 border-purple-200/50 dark:bg-purple-950': invoice?.status === InvoiceStatus.GST_SUBMITTED }
             )}

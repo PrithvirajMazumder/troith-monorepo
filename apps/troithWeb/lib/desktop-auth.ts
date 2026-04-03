@@ -3,6 +3,7 @@
 import { randomBytes, createHash } from 'crypto'
 import { cookies } from 'next/headers'
 
+import { DESKTOP_PROTOCOL, DESKTOP_AUTH_CALLBACK_PATH } from './desktop-auth-constants'
 export { DESKTOP_PROTOCOL, DESKTOP_AUTH_CALLBACK_PATH } from './desktop-auth-constants'
 
 const DESKTOP_PKCE_VERIFIER_COOKIE = 'desktop_pkce_verifier'
