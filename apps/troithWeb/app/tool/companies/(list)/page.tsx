@@ -4,7 +4,9 @@ import { useRouter } from 'next-nprogress-bar'
 import { useSession } from 'next-auth/react'
 import { useSearchParams, useParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { useDebounce } from '@troith/shared'
+import { Button, useDebounce } from '@troith/shared'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { companiesKeys } from '@troithWeb/app/tool/queryKeys/companies'
 import { TableFilterParams } from '@troithWeb/app/tool/queryKeys/items'
 import { DataTable } from '@troithWeb/app/tool/components/data-table/data-table'
@@ -80,19 +82,29 @@ export default function CompaniesPage() {
   const columns = getCompanyColumns(sortBy, sortOrder, handleSortChange)
 
   return (
-    <DataTable
-      columns={columns}
-      data={data?.data ?? []}
-      total={data?.total ?? 0}
-      page={page}
-      limit={limit}
-      isLoading={isLoading}
-      searchValue={searchValue}
-      onPageChange={handlePageChange}
-      onSearchChange={handleSearchChange}
-      onRowClick={(company) => router.push(`/tool/companies/${company.id}`)}
-      activeRowId={activeCompanyId}
-      searchPlaceholder="Search companies..."
-    />
+    <div className="flex flex-col h-full w-full">
+      <div className="flex items-center justify-end px-4 pt-4">
+        <Button asChild size="sm">
+          <Link href="/tool/companies/create">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Company
+          </Link>
+        </Button>
+      </div>
+      <DataTable
+        columns={columns}
+        data={data?.data ?? []}
+        total={data?.total ?? 0}
+        page={page}
+        limit={limit}
+        isLoading={isLoading}
+        searchValue={searchValue}
+        onPageChange={handlePageChange}
+        onSearchChange={handleSearchChange}
+        onRowClick={(company) => router.push(`/tool/companies/${company.id}`)}
+        activeRowId={activeCompanyId}
+        searchPlaceholder="Search companies..."
+      />
+    </div>
   )
 }
