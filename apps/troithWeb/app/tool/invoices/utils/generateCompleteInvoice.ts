@@ -7,7 +7,9 @@ import { capitalize } from '@troithWeb/utils/string'
 import { format } from 'date-fns'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { getDecimalPart } from '@troithWeb/utils/number'
+import { numberToWords } from '@troithWeb/utils/numberToWords'
 import { InvoiceItemType, InvoiceType } from '@troithWeb/types/invoices'
+import { formatInvoiceNo } from '@troithWeb/utils/financialYear'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 if (typeof window !== 'undefined') {
@@ -62,12 +64,9 @@ export const generateCompleteInvoicePdf = (invoice: InvoiceType) => {
                     text: capitalize(invoice?.company?.legalName ?? ''),
                     style: { fontSize: InvoiceFontSizes.HeadTitleFontSize }
                   },
-                  {
-                    text: 'Specialist in: Water Treatment Engineering',
-                    style: {
-                      italics: true
-                    }
-                  }
+                  ...(invoice?.company?.tagLine
+                    ? [{ text: invoice.company.tagLine, style: { italics: true } }]
+                    : [])
                 ]
               },
               '',
@@ -107,15 +106,15 @@ export const generateCompleteInvoicePdf = (invoice: InvoiceType) => {
               '',
               ''
             ],
-            [{ text: 'Phone: 1234567890', colSpan: 2 }, '', '', ''],
+            [{ text: `Phone: ${invoice?.company?.phone ?? ''}`, colSpan: 2 }, '', '', ''],
             [
               {
-                text: 'Email: p@p.com',
+                text: `Email: ${invoice?.company?.email ?? ''}`,
                 colSpan: 2
               },
               '',
               {
-                text: `Invoice No: ${invoice?.no}`,
+                text: `Invoice No: ${formatInvoiceNo(invoice?.no, invoice?.financialYear)}`,
                 colSpan: 2
               },
               ''
@@ -251,7 +250,7 @@ export const generateCompleteInvoicePdf = (invoice: InvoiceType) => {
                 style: { alignment: 'right' }
               }
             ],
-            ['', '', { text: 'ruppes', colSpan: 2 }, '']
+            ['', '', { text: numberToWords(netTotal), colSpan: 2, style: { fontSize: InvoiceFontSizes.SmallFontSize } }, '']
           ]
         }
       }

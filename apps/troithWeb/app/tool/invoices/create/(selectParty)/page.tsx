@@ -10,7 +10,10 @@ import { Party } from '@prisma/client'
 import { useQuery } from '@tanstack/react-query'
 import { partiesKeys } from '@troithWeb/app/tool/queryKeys/parties'
 
-const fetchPartiesByCompany = async (companyId: string): Promise<Array<Party>> => await (await fetch(`/api/parties/company/${companyId}`)).json()
+const fetchPartiesByCompany = async (companyId: string): Promise<Array<Party>> => {
+  const res = await (await fetch(`/api/parties/company/${companyId}`)).json()
+  return res?.data ?? res
+}
 
 export default function SelectPartyCreateInvoicePage() {
   const { selectedCompany } = useCompanyStore()

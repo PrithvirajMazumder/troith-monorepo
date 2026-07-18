@@ -3,6 +3,7 @@ import { Badge, H4, Separator } from '@troith/shared'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Invoice, InvoiceItem, InvoiceStatus, Party, Tax, Bank } from '@prisma/client'
+import { formatInvoiceNo } from '@troithWeb/utils/financialYear'
 
 const formatDateSafe = (date: unknown): string => {
   if (!date) return '-'
@@ -48,7 +49,7 @@ export const InvoiceCard = ({ invoice }: Props) => {
           <div className="flex items-center">
             <div className="flex items-center gap-2 w-full">
               <H4 className="font-semibold">{invoice?.party?.name}</H4>
-              <div className="ml-auto text-xs">No: {invoice?.no}</div>
+              <div className="ml-auto text-xs font-mono">{formatInvoiceNo(invoice?.no, invoice?.financialYear)}</div>
             </div>
           </div>
           <div className="flex items-center gap-2 h-4 mb-2">

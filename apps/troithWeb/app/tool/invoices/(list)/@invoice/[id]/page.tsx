@@ -36,6 +36,7 @@ const formatDateSafe = (date: unknown): string => {
 import { CreateInvoiceSidePanelInvoiceItemList } from '@troithWeb/app/tool/invoices/create/components/createInvoiceSidePanelInfo/createInvoiceSidePanelInvoiceItemList'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
+import { formatInvoiceNo } from '@troithWeb/utils/financialYear'
 import { InvoiceStatus } from '@prisma/client'
 import { InvoiceType } from '@troithWeb/types/invoices'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -252,7 +253,7 @@ export default function InvoicePage({ params: { id: invoiceId } }: { params: { i
               {...animateBasicMotionOpacity()}
               className="p-4 border rounded-t-lg bg-background border-dashed relative"
             >
-              <p className="text-lg font-semibold capitalize">Invoice No: {invoice?.no}</p>
+              <p className="text-lg font-semibold capitalize">Invoice No: {invoice?.no && invoice?.financialYear ? formatInvoiceNo(invoice.no, invoice.financialYear) : invoice?.no}</p>
               <div className="w-full flex flex-col">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Status:</p>

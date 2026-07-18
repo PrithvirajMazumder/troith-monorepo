@@ -40,6 +40,7 @@ import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
 import { fetchBanks, fetchInvoiceByNo, fetchNextInvoiceNo, fetchTaxes } from '@troithWeb/app/tool/invoices/create/finalize-invoice/apis'
 import { InvoiceType } from '@troithWeb/types/invoices'
 import { useSession } from 'next-auth/react'
+import { formatInvoiceNo, getFinancialYear } from '@troithWeb/utils/financialYear'
 
 export default function AddMisc() {
   const FINALIZE_INVOICE_FORM_ID = 'FINALIZE_INVOICE_FORM_ID'
@@ -49,6 +50,8 @@ export default function AddMisc() {
   const { setSelectedBank, setSelectedTax, setSelectedDate } = useCreateInvoice()
   const { createInvoice } = useFinalizeInvoice()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [invoiceDate, setInvoiceDate] = useState<Date | undefined>(undefined)
+  const currentFy = invoiceDate ? getFinancialYear(invoiceDate) : getFinancialYear(new Date())
   const { data: taxationData } = useQuery({
     queryKey: taxesKeys.lists(selectedCompany?.id ?? ''),
     queryFn: () => fetchTaxes(selectedCompany?.id ?? ''),
@@ -60,8 +63,8 @@ export default function AddMisc() {
     enabled: !!session?.user?.id
   })
   const { data: nextInvoiceNumberData } = useQuery({
-    queryKey: invoicesKeys.nextNo(selectedCompany?.id ?? ''),
-    queryFn: fetchNextInvoiceNo,
+    queryKey: invoicesKeys.nextNo(selectedCompany?.id ?? '', currentFy),
+    queryFn: () => fetchNextInvoiceNo(selectedCompany?.id ?? '', invoiceDate?.toISOString() ?? new Date().toISOString()),
     enabled: !!selectedCompany?.id
   })
   const [isTaxationDialogOpen, setIsTaxationDialogOpen] = useState(false)
@@ -82,7 +85,7 @@ export default function AddMisc() {
     resolver: yupResolver(FinaliseInvoiceFormValidationSchema),
     defaultValues: {
       shouldUseIgst: false,
-      invoiceNumber: nextInvoiceNumberData ?? undefined,
+      invoiceNumber: nextInvoiceNumberData?.no ?? undefined,
       date: ''
     }
   })
@@ -98,13 +101,19 @@ export default function AddMisc() {
     data: invoiceNumberData,
     isFetching: isInvoiceNumberPresentLoading
   } = useQuery({
-    queryKey: invoicesKeys.byNo(invoiceNumber),
-    queryFn: () => fetchInvoiceByNo(invoiceNumber),
-    enabled: Boolean(invoiceNumber)
+    queryKey: invoicesKeys.byNo(invoiceNumber, selectedCompany?.id ?? '', currentFy),
+    queryFn: () => fetchInvoiceByNo(invoiceNumber, selectedCompany?.id ?? '', currentFy),
+    enabled: false
   })
 
   useEffect(() => {
-    if ((debouncedInvoiceNumber as string)?.length && debouncedInvoiceNumber !== nextInvoiceNumberData) {
+    if (nextInvoiceNumberData?.no && !invoiceNumber) {
+      setValue('invoiceNumber', nextInvoiceNumberData.no)
+    }
+  }, [nextInvoiceNumberData])
+
+  useEffect(() => {
+    if ((debouncedInvoiceNumber as string)?.length && debouncedInvoiceNumber !== nextInvoiceNumberData?.no) {
       void fetchInvoiceByNumber()
     }
   }, [debouncedInvoiceNumber])
@@ -158,7 +167,9 @@ export default function AddMisc() {
             hint={
               errors?.invoiceNumber?.message?.length
                 ? errors?.invoiceNumber?.message
-                : 'Must be a number. Default increment available for new values; do not use for past invoices.'
+                : invoiceNumber && currentFy
+                  ? `Will appear as: ${formatInvoiceNo(invoiceNumber, currentFy)}`
+                  : 'Must be a number. Default increment available for new values.'
             }
           >
             <div className="h-max relative w-full">
@@ -188,6 +199,7 @@ export default function AddMisc() {
                   selected={new Date(date)}
                   onSelect={(date) => {
                     if (date) {
+                      setInvoiceDate(date)
                       setSelectedDate(date.toISOString())
                       setValue('date', format(date, 'dd/MM/yyyy'))
                       void trigger('date')

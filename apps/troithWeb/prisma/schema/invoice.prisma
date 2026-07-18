@@ -1,6 +1,7 @@
 model Invoice {
   id            String        @id @default(cuid())
-  no            Int           @unique @default(autoincrement())
+  no            Int
+  financialYear String
   vehicleNumber String
   date          DateTime
   status        InvoiceStatus
@@ -17,6 +18,8 @@ model Invoice {
   bank        Bank          @relation(fields: [bankId], references: [id], onDelete: Cascade)
   tax         Tax           @relation(fields: [taxId], references: [id], onDelete: Cascade)
   InvoiceItem InvoiceItem[]
+
+  @@unique([companyId, financialYear, no])
 }
 
 model InvoiceItem {

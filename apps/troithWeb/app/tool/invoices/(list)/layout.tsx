@@ -20,6 +20,11 @@ import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next-nprogress-bar'
 import { useDebounce } from '@troith/shared'
 import { InvoiceStatus } from '@prisma/client'
+import { useQuery } from '@tanstack/react-query'
+import { invoicesKeys } from '@troithWeb/app/tool/queryKeys/invoices'
+import { useCompanyStore } from '@troithWeb/app/tool/stores/CompanySore'
+import { getFinancialYear } from '@troithWeb/utils/financialYear'
+import { cn } from '@troith/shared/lib/util'
 
 type Props = {
   children: ReactNode
@@ -34,9 +39,27 @@ const statusOptions: { value: InvoiceStatus; label: string; icon: ReactNode }[] 
   { value: 'GST_SUBMITTED', label: 'GST Submitted', icon: <FileCheck className="h-4 w-4" /> }
 ]
 
+const fetchFinancialYears = async (companyId: string): Promise<string[]> =>
+  await (await fetch(`/api/invoices/company/${companyId}/financial-years`)).json()
+
 export default function InvoicesLayout(props: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { selectedCompany } = useCompanyStore()
+  const currentFy = getFinancialYear(new Date())
+
+  const { data: financialYears } = useQuery({
+    queryKey: invoicesKeys.financialYears(selectedCompany?.id ?? ''),
+    queryFn: () => fetchFinancialYears(selectedCompany?.id ?? ''),
+    enabled: !!selectedCompany?.id
+  })
+
+  const selectedFy = searchParams.get('fy') || currentFy
+
+  const formatFyLabel = (fy: string) => {
+    const [start, end] = fy.split('-')
+    return `FY 20${start}-${end}`
+  }
 
   const [searchValue, setSearchValue] = useState(searchParams.get('search') || '')
   const debouncedSearch = useDebounce(searchValue, 300)
@@ -83,6 +106,29 @@ export default function InvoicesLayout(props: Props) {
       autoSaveId="INVOICE_RESIZABLE_LAYOUT_KEY"
       firstCol={
         <>
+          {financialYears && financialYears.length > 0 && (
+            <div className="border-b px-4 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+              {(financialYears.includes(currentFy) ? financialYears : [currentFy, ...financialYears]).map((fy) => (
+                <button
+                  key={fy}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString())
+                    params.set('fy', fy)
+                    params.set('page', '1')
+                    router.replace(`?${params.toString()}`, { scroll: false })
+                  }}
+                  className={cn(
+                    'px-3 py-2 text-xs font-medium whitespace-nowrap border-b-2 transition-colors',
+                    selectedFy === fy
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
+                  )}
+                >
+                  {formatFyLabel(fy)}
+                </button>
+              ))}
+            </div>
+          )}
           <header className="border-b px-4 h-16 flex items-center gap-2">
             <Input
               className="h-8 w-6xl shadow-sm"

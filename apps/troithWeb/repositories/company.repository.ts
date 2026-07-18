@@ -22,6 +22,12 @@ export function CompanyRepository() {
         data: company
       })
     },
+    update: (id: string, data: Prisma.CompanyUpdateInput) => {
+      return prisma.company.update({
+        where: { id },
+        data
+      })
+    },
     findWithFilters: async ({
       userId,
       search,

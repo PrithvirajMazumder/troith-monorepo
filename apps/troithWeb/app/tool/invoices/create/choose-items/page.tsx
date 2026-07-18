@@ -16,7 +16,10 @@ import { ItemType } from '@troithWeb/types/items'
 
 type ItemsMap = { [key: string]: ItemType }
 
-const fetchItems = async (companyId: string): Promise<Array<ItemType>> => await (await fetch(`/api/items/company/${companyId}`)).json()
+const fetchItems = async (companyId: string): Promise<Array<ItemType>> => {
+  const res = await (await fetch(`/api/items/company/${companyId}`)).json()
+  return res?.data ?? res
+}
 
 export default function SelectItemsCreateInvoicePage() {
   const AccordionId = 'party-items-collapsible'

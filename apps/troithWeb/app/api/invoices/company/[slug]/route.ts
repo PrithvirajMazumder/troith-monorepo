@@ -29,6 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean) as InvoiceStatus[]
+  const financialYear = searchParams.get('financialYear') || undefined
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1)
   const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '20', 10) || 20))
 
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     const invoiceRepository = InvoiceRepository()
     const { invoices, total } = await invoiceRepository.findByCompanyIdWithFilters({
       companyId,
+      financialYear,
       search: search || undefined,
       statuses: statuses.length > 0 ? statuses : undefined,
       page,

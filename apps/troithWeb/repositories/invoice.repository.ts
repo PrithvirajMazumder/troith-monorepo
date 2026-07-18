@@ -7,32 +7,34 @@ export const InvoiceRepository = () => {
     create: (invoice: Prisma.Args<typeof prisma.invoice, 'create'>['data']) => {
       return prisma.invoice.create({ data: invoice })
     },
-    findNextInvoiceNo: async () => {
+    findNextInvoiceNo: async (companyId: string, financialYear: string) => {
       const latestInvoice = await prisma.invoice.findFirst({
-        orderBy: {
-          no: 'desc'
-        },
-        select: {
-          no: true
-        }
+        where: { companyId, financialYear },
+        orderBy: { no: 'desc' },
+        select: { no: true }
       })
-
       return (latestInvoice?.no || 0) + 1
     },
     findByCompanyIdWithFilters: async ({
       companyId,
+      financialYear,
       search,
       statuses,
       page,
       limit
     }: {
       companyId: string
+      financialYear?: string
       search?: string
       statuses?: InvoiceStatus[]
       page: number
       limit: number
     }) => {
       const where: Prisma.InvoiceWhereInput = { companyId }
+
+      if (financialYear) {
+        where.financialYear = financialYear
+      }
 
       if (statuses && statuses.length > 0) {
         where.status = { in: statuses }
@@ -125,10 +127,10 @@ export const InvoiceRepository = () => {
         }
       })
     },
-    findByNo: (no: number) => {
+    findByNo: (no: number, companyId: string, financialYear: string) => {
       return prisma.invoice.findUnique({
         where: {
-          no: no
+          companyId_financialYear_no: { companyId, financialYear, no }
         },
         include: {
           InvoiceItem: {
@@ -147,6 +149,15 @@ export const InvoiceRepository = () => {
           party: true
         }
       })
+    },
+    findFinancialYears: async (companyId: string) => {
+      const results = await prisma.invoice.findMany({
+        where: { companyId },
+        select: { financialYear: true },
+        distinct: ['financialYear'],
+        orderBy: { financialYear: 'desc' }
+      })
+      return results.map((r) => r.financialYear)
     },
     update: (newInvoiceData: UpdateInvoice, invoiceId: string) => {
       return prisma.invoice.update({

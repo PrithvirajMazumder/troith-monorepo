@@ -8,8 +8,10 @@ import { getGrossTotalValueFromInvoiceItems, InvoiceFontSizes } from '@troithWeb
 import { TDocumentDefinitions } from 'pdfmake/interfaces'
 import { convertAmountToInr } from '@troithWeb/utils/currency'
 import { getDecimalPart } from '@troithWeb/utils/number'
+import { numberToWords } from '@troithWeb/utils/numberToWords'
 import { format } from 'date-fns'
 import { getInvoiceTotals } from '@troithWeb/app/tool/invoices/create/utils/getInvoiceTotals'
+import { formatInvoiceNo, getFinancialYear } from '@troithWeb/utils/financialYear'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 if (typeof window !== 'undefined') {
@@ -125,6 +127,8 @@ const putFinalInvoiceInfo = (invoice: Partial<Omit<Invoice, 'party' | 'company' 
   thirdSection.body[3][3].text = convertAmountToInr(igst, false)
   thirdSection.body[4][3].text = convertAmountToInr(roundOff, false)
   thirdSection.body[5][3].text = convertAmountToInr(netTotal, false)
+  thirdSection.body[6][2].text = numberToWords(netTotal)
+  thirdSection.body[6][2].style = { fontSize: 8 }
   const bankSection = thirdSection.body[0][1].stack
   if (invoice?.bank) {
     bankSection[2].text = invoice?.bank?.accountNumber
@@ -135,7 +139,7 @@ const putFinalInvoiceInfo = (invoice: Partial<Omit<Invoice, 'party' | 'company' 
   // @ts-expect-error while copying content becomes un-iterable
   const firstSection = newPdf.content[0].table
   firstSection.body[0][2].stack[4] = `Vehicle No: ${invoice?.vehicleNumber}`
-  firstSection.body[3][2] = `Invoice No: ${invoice?.no ? invoice?.no : ''}`
+  firstSection.body[3][2] = `Invoice No: ${invoice?.no ? formatInvoiceNo(invoice.no as number, invoice.financialYear ?? getFinancialYear(new Date())) : ''}`
   firstSection.body[4][2] = `Date: ${invoice?.date?.length ? format(invoice?.date, 'dd/MM/yyyy') : ''}`
 
   return {
@@ -243,12 +247,9 @@ export const getBaseInvoicePdf = ({ company }: Pick<Invoice, 'company'>) => {
                     text: capitalize(company?.legalName ?? ''),
                     style: { fontSize: InvoiceFontSizes.HeadTitleFontSize }
                   },
-                  {
-                    text: 'Specialist in: Water Treatment Engineering',
-                    style: {
-                      italics: true
-                    }
-                  }
+                  ...(company?.tagLine
+                    ? [{ text: company.tagLine, style: { italics: true } }]
+                    : [])
                 ]
               },
               '',
@@ -275,10 +276,10 @@ export const getBaseInvoicePdf = ({ company }: Pick<Invoice, 'company'>) => {
               '',
               ''
             ],
-            [{ text: 'Phone: 1234567890', colSpan: 2 }, '', '', ''],
+            [{ text: `Phone: ${company?.phone ?? ''}`, colSpan: 2 }, '', '', ''],
             [
               {
-                text: 'Email: p@p.com',
+                text: `Email: ${company?.email ?? ''}`,
                 colSpan: 2
               },
               '',
@@ -405,7 +406,7 @@ export const getBaseInvoicePdf = ({ company }: Pick<Invoice, 'company'>) => {
                 style: { alignment: 'right' }
               }
             ],
-            ['', '', { text: 'ruppes', colSpan: 2 }, '']
+            ['', '', { text: '', colSpan: 2 }, '']
           ]
         }
       }
